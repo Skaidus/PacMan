@@ -621,6 +621,7 @@ class Game(object):
         while not self.gameOver:
             # Fetch the next agent
             agent = self.agents[agentIndex]
+            
             move_time = 0
             skip_action = False
                 
@@ -646,6 +647,17 @@ class Game(object):
                 self.unmute()
             else:
                 observation = self.state.deepCopy()
+            if 'printLineData' in dir( agent ):
+                # Open the log to write the state
+                f = open("log.txt", "a")
+                # If we just started, new play
+                if step == 0:
+                    if os.stat("log.txt").st_size != 0:
+                        f.write("\n")
+                else:
+                    f.write(",")    
+                f.write(agent.printLineData(observation))
+                f.close()
             # Solicit an action
             action = None
             step += 1

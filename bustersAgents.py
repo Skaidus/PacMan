@@ -277,4 +277,11 @@ class BasicAgentAA(BustersAgent):
         return move
 
     def printLineData(self, gameState):
-        return "XXXXXXXXXX"
+        return ''.join(("{PacmanPosition:"+str(gameState.getPacmanPosition()),
+        ";PacmanDirection:"+str(gameState.data.agentStates[0].getDirection()),
+        ";LegalPacmanActions:"+str(gameState.getLegalPacmanActions()),
+        ";GhostDistances:"+str(gameState.data.ghostDistances),
+        ";LivingGhosts:"+str(gameState.getLivingGhosts()),
+        ";GhostDirections:"+str(gameState.getGhostDirections()),
+        ";Score:"+str(gameState.getScore()),
+        ";Nearest:"+str(gameState.getDistanceNearestFood())+"}"))
