@@ -267,7 +267,7 @@ class BasicAgentAA(BustersAgent):
     def chooseAction(self, gameState):
         self.countActions = self.countActions + 1
         self.printInfo(gameState)
-        move = Directions.STOP
+        move = gameState.data.agentStates[0].getDirection()
         legal = gameState.getLegalActions(0) ##Legal position from the pacman
               
         nearestLivingGhost = -1
@@ -282,16 +282,12 @@ class BasicAgentAA(BustersAgent):
         nearestGhostPositions = gameState.getGhostPositions()[nearestLivingGhost] 
         actualPosition = gameState.getPacmanPosition()
         
-        if gameState.data.agentStates[0].getDirection() == 'North' or gameState.data.agentStates[0].getDirection() == 'South':
-            if(nearestGhostPositions[0] < actualPosition[0]) and Directions.WEST in legal:  move = Directions.WEST
-            elif(nearestGhostPositions[0] > actualPosition[0]) and Directions.EAST in legal:  move = Directions.EAST
-            elif(nearestGhostPositions[1] > actualPosition[1]) and Directions.NORTH in legal:  move = Directions.NORTH
-            elif(nearestGhostPositions[1] < actualPosition[1]) and Directions.SOUTH in legal:  move = Directions.SOUTH
-        else:
-            if(nearestGhostPositions[1] > actualPosition[1]) and Directions.NORTH in legal:  move = Directions.NORTH
-            elif(nearestGhostPositions[1] < actualPosition[1]) and Directions.SOUTH in legal:  move = Directions.SOUTH
-            elif(nearestGhostPositions[0] < actualPosition[0]) and Directions.WEST in legal:  move = Directions.WEST
-            elif(nearestGhostPositions[0] > actualPosition[0]) and Directions.EAST in legal:  move = Directions.EAST
+        ## Si mi último movimiento fue horizontal, empiezo girando en el vertical (y vice versa)
+        ## Así evito que se embucle girando de norte a sur y de sur a norte (y así).........................
+        if(nearestGhostPositions[1] > actualPosition[1]) and Directions.NORTH in legal:  move = Directions.NORTH
+        elif(nearestGhostPositions[1] < actualPosition[1]) and Directions.SOUTH in legal:  move = Directions.SOUTH
+        elif(nearestGhostPositions[0] < actualPosition[0]) and Directions.WEST in legal:  move = Directions.WEST
+        elif(nearestGhostPositions[0] > actualPosition[0]) and Directions.EAST in legal:  move = Directions.EAST
         
         ## Si tras girar resulta que me he puesto mirando a la pared, vuelvo a girar 
         actualDirection = gameState.data.agentStates[0].getDirection()
@@ -299,16 +295,20 @@ class BasicAgentAA(BustersAgent):
             
         if actualDirection == 'North' and walls[actualPosition[0]][actualPosition[1]+1] == True :
             if Directions.EAST in legal:  move = Directions.EAST 
-            elif Directions.WEST in legal:  move = Directions.WEST 
+            elif Directions.WEST in legal:  move = Directions.WEST
+            elif Directions.SOUTH in legal:  move = Directions.SOUTH
         elif actualDirection == 'South' and walls[actualPosition[0]][actualPosition[1]-1] == True :
             if Directions.EAST in legal:  move = Directions.EAST 
-            elif Directions.WEST in legal:  move = Directions.WEST 
+            elif Directions.WEST in legal:  move = Directions.WEST
+            elif Directions.NORTH in legal:  move = Directions.NORTH 
         elif actualDirection == 'East' and walls[actualPosition[0]+1][actualPosition[1]] == True :
             if Directions.NORTH in legal:  move = Directions.NORTH 
-            elif Directions.SOUTH in legal:  move = Directions.SOUTH 
+            elif Directions.SOUTH in legal:  move = Directions.SOUTH
+            elif Directions.WEST in legal:  move = Directions.WEST
         elif actualDirection == 'West' and walls[actualPosition[0]-1][actualPosition[1]] == True :
             if Directions.NORTH in legal:  move = Directions.NORTH 
-            elif Directions.SOUTH in legal:  move = Directions.SOUTH 
+            elif Directions.SOUTH in legal:  move = Directions.SOUTH
+            elif Directions.EAST in legal:  move = Directions.EAST 
 
         return move
     
