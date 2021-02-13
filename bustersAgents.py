@@ -269,12 +269,50 @@ class BasicAgentAA(BustersAgent):
         self.printInfo(gameState)
         move = Directions.STOP
         legal = gameState.getLegalActions(0) ##Legal position from the pacman
-        move_random = random.randint(0, 3)
-        if   ( move_random == 0 ) and Directions.WEST in legal:  move = Directions.WEST
-        if   ( move_random == 1 ) and Directions.EAST in legal: move = Directions.EAST
-        if   ( move_random == 2 ) and Directions.NORTH in legal:   move = Directions.NORTH
-        if   ( move_random == 3 ) and Directions.SOUTH in legal: move = Directions.SOUTH
+              
+        nearestLivingGhost = -1
+        i = 0
+        while i < len(gameState.getLivingGhosts()) - 1:
+            if gameState.getLivingGhosts()[i+1] == True:
+                currentGhostDistance = gameState.data.ghostDistances[i]
+                if(nearestLivingGhost == -1 or currentGhostDistance < gameState.data.ghostDistances[nearestLivingGhost]) :
+                    nearestLivingGhost = i
+            i += 1
+
+        nearestGhostPositions = gameState.getGhostPositions()[nearestLivingGhost] 
+        actualPosition = gameState.getPacmanPosition()
+        
+        if gameState.data.agentStates[0].getDirection() == 'North' or gameState.data.agentStates[0].getDirection() == 'South':
+            if(nearestGhostPositions[0] < actualPosition[0]) and Directions.WEST in legal:  move = Directions.WEST
+            elif(nearestGhostPositions[0] > actualPosition[0]) and Directions.EAST in legal:  move = Directions.EAST
+            elif(nearestGhostPositions[1] > actualPosition[1]) and Directions.NORTH in legal:  move = Directions.NORTH
+            elif(nearestGhostPositions[1] < actualPosition[1]) and Directions.SOUTH in legal:  move = Directions.SOUTH
+        else:
+            if(nearestGhostPositions[1] > actualPosition[1]) and Directions.NORTH in legal:  move = Directions.NORTH
+            elif(nearestGhostPositions[1] < actualPosition[1]) and Directions.SOUTH in legal:  move = Directions.SOUTH
+            elif(nearestGhostPositions[0] < actualPosition[0]) and Directions.WEST in legal:  move = Directions.WEST
+            elif(nearestGhostPositions[0] > actualPosition[0]) and Directions.EAST in legal:  move = Directions.EAST
+        
+        ## Si tras girar resulta que me he puesto mirando a la pared, vuelvo a girar 
+        actualDirection = gameState.data.agentStates[0].getDirection()
+        walls = gameState.getWalls()
+            
+        if actualDirection == 'North' and walls[actualPosition[0]][actualPosition[1]+1] == True :
+            if Directions.EAST in legal:  move = Directions.EAST 
+            elif Directions.WEST in legal:  move = Directions.WEST 
+        elif actualDirection == 'South' and walls[actualPosition[0]][actualPosition[1]-1] == True :
+            if Directions.EAST in legal:  move = Directions.EAST 
+            elif Directions.WEST in legal:  move = Directions.WEST 
+        elif actualDirection == 'East' and walls[actualPosition[0]+1][actualPosition[1]] == True :
+            if Directions.NORTH in legal:  move = Directions.NORTH 
+            elif Directions.SOUTH in legal:  move = Directions.SOUTH 
+        elif actualDirection == 'West' and walls[actualPosition[0]-1][actualPosition[1]] == True :
+            if Directions.NORTH in legal:  move = Directions.NORTH 
+            elif Directions.SOUTH in legal:  move = Directions.SOUTH 
+
         return move
+    
+    
 
     def printLineData(self, gameState):
         return ''.join(("{PacmanPosition:"+str(gameState.getPacmanPosition()),
