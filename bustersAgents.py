@@ -273,7 +273,9 @@ class BasicAgentAA(BustersAgent):
         self.printInfo(gameState)
         move = gameState.data.agentStates[0].getDirection() ## por defecto el siguiente movimiento es la misma dirección del anterior
         legal = gameState.getLegalActions(0) ##Legal position from the pacman
-        
+
+        if len(legal) == 2: return legal[0]
+
         global isWall
         global desiredMove
 
