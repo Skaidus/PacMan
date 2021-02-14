@@ -294,40 +294,30 @@ class BasicAgentAA(BustersAgent):
 
         nearestGhostPositions = gameState.getGhostPositions()[nearestLivingGhost] 
         actualPosition = gameState.getPacmanPosition()
+        prevMove = gameState.data.agentStates[0].getDirection()
+        best_move = legal[0]
+        i = 0
+        while Directions.REVERSE[best_move] == prevMove or best_move == Directions.STOP:
+            i+=1
+            best_move = legal[i]
+        if Directions.REVERSE[best_move] == prevMove: best_move = legal[1]
+        for move in legal:
+            if Directions.REVERSE[move] != prevMove and move != Directions.STOP:
+                if util.manhattanDistance(self.applyDirection( actualPosition, best_move), nearestGhostPositions) > util.manhattanDistance(self.applyDirection(actualPosition,move), nearestGhostPositions):
+                    best_move = move
 
-        if nearestGhostPositions[1] > actualPosition[1]:
-            desiredMove = Directions.NORTH
-            if Directions.NORTH in legal: return Directions.NORTH
+        return best_move
 
-        elif nearestGhostPositions[1] < actualPosition[1] :
-            desiredMove = Directions.SOUTH
-            if Directions.SOUTH in legal: return Directions.SOUTH
+    def applyDirection(self, xy, direction):
+        if direction == Directions.SOUTH:
+            return [xy[0], xy[1]-1]
+        elif direction == Directions.EAST:
+            return [xy[0]+1, xy[1]]
+        elif direction == Directions.WEST:
+            return [xy[0]-1, xy[1]]
+        else: 
+            return [xy[0], xy[1]+1]
 
-        elif nearestGhostPositions[0] < actualPosition[0] :
-            desiredMove = Directions.WEST
-            if Directions.WEST in legal: return Directions.WEST
-
-        elif nearestGhostPositions[0] > actualPosition[0] :
-            desiredMove = Directions.EAST
-            if Directions.EAST in legal: return Directions.EAST
-
-        ## Si no he conseguido moverme es porque hay una pared. El orden del giro importa:
-        ## Si quiero ir al norte o al sur, intento moverme primero en el eje horizontal (este, oeste)
-        ## Si tampoco me puedo mover en este eje es pq tengo que retroceder. Y vice versa.
-        if desiredMove == 'North' or desiredMove == 'South':
-            if Directions.EAST in legal: move = Directions.EAST
-            elif Directions.WEST in legal: move = Directions.WEST
-            elif Directions.NORTH in legal: move = Directions.NORTH
-            elif Directions.SOUTH in legal: move = Directions.SOUTH
-        else:
-            if Directions.NORTH in legal: move = Directions.NORTH
-            elif Directions.SOUTH in legal: move = Directions.SOUTH
-            elif Directions.EAST in legal: move = Directions.EAST
-            elif Directions.WEST in legal: move = Directions.WEST
-            
-        isWall = True
-
-        return move
        
 
     def printLineData(self, gameState):
