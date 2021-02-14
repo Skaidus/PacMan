@@ -205,9 +205,6 @@ class GreedyBustersAgent(BustersAgent):
              if livingGhosts[i+1]]
         return Directions.EAST
 
-isWall = False
-desiredMove = 'North'
-
 class BasicAgentAA(BustersAgent):
 
     def registerInitialState(self, gameState):
@@ -271,19 +268,9 @@ class BasicAgentAA(BustersAgent):
     def chooseAction(self, gameState):
         self.countActions = self.countActions + 1
         self.printInfo(gameState)
-        move = gameState.data.agentStates[0].getDirection() ## por defecto el siguiente movimiento es la misma dirección del anterior
         legal = gameState.getLegalActions(0) ##Legal position from the pacman
 
         if len(legal) == 2: return legal[0]
-
-        global isWall
-        global desiredMove
-
-        if isWall == True :
-            if desiredMove in legal: 
-                isWall = False
-                return desiredMove ## si estaba recorriendo una pared pero ya la he acabado giro
-            else: return move ## si aun estoy recorriendo pared sigo en la misma direccion
 
         nearestLivingGhost = -1
         i = 0
@@ -294,7 +281,7 @@ class BasicAgentAA(BustersAgent):
                     nearestLivingGhost = i
             i += 1
 
-        nearestGhostPositions = gameState.getGhostPositions()[nearestLivingGhost] 
+        nearestGhostPositions = gameState.getGhostPositions()[nearestLivingGhost]
         actualPosition = gameState.getPacmanPosition()
         prevMove = gameState.data.agentStates[0].getDirection()
         best_move = legal[0]
