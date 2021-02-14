@@ -295,40 +295,40 @@ class BasicAgentAA(BustersAgent):
 
         nearestGhostPositions = gameState.getGhostPositions()[nearestLivingGhost] 
         actualPosition = gameState.getPacmanPosition()
-        
-        if(nearestGhostPositions[1] > actualPosition[1]) and Directions.NORTH in legal:  move = Directions.NORTH
-        elif(nearestGhostPositions[1] < actualPosition[1]) and Directions.SOUTH in legal:  move = Directions.SOUTH
-        elif(nearestGhostPositions[0] < actualPosition[0]) and Directions.WEST in legal:  move = Directions.WEST
-        elif(nearestGhostPositions[0] > actualPosition[0]) and Directions.EAST in legal:  move = Directions.EAST
+
+        if nearestGhostPositions[1] > actualPosition[1]: desiredMove = Directions.NORTH
+        elif nearestGhostPositions[1] < actualPosition[1] :  desiredMove = Directions.SOUTH
+        elif nearestGhostPositions[0] < actualPosition[0] :  desiredMove = Directions.WEST
+        elif nearestGhostPositions[0] > actualPosition[0] :  desiredMove = Directions.EAST
                         
         ## Si tras girar resulta que me he puesto mirando a la pared, vuelvo a girar 
-        desiredMove = move
         walls = gameState.getWalls()
         
-        if move == 'North' and walls[actualPosition[0]][actualPosition[1]+1] == True :
+        if desiredMove == 'North' and walls[actualPosition[0]][actualPosition[1]+1] is True :
             if Directions.EAST in legal:  move = Directions.EAST 
             elif Directions.WEST in legal:  move = Directions.WEST
             elif Directions.SOUTH in legal:  move = Directions.SOUTH
             isWall = True
             
-        elif move == 'South' and walls[actualPosition[0]][actualPosition[1]-1] == True :
+        elif desiredMove == 'South' and walls[actualPosition[0]][actualPosition[1]-1] is True :
             if Directions.EAST in legal:  move = Directions.EAST 
             elif Directions.WEST in legal:  move = Directions.WEST
             elif Directions.NORTH in legal:  move = Directions.NORTH
             isWall = True
 
-        elif move == 'East' and walls[actualPosition[0]+1][actualPosition[1]] == True :
+        elif desiredMove == 'East' and walls[actualPosition[0]+1][actualPosition[1]] is True :
             if Directions.NORTH in legal:  move = Directions.NORTH 
             elif Directions.SOUTH in legal:  move = Directions.SOUTH
             elif Directions.WEST in legal:  move = Directions.WEST
             isWall = True
 
-        elif move == 'West' and walls[actualPosition[0]-1][actualPosition[1]] == True :
+        elif desiredMove == 'West' and walls[actualPosition[0]-1][actualPosition[1]] is True :
             if Directions.NORTH in legal:  move = Directions.NORTH 
             elif Directions.SOUTH in legal:  move = Directions.SOUTH
             elif Directions.EAST in legal:  move = Directions.EAST
             isWall = True
 
+        else : move = desiredMove
         return move
        
 
