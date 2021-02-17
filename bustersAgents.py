@@ -205,6 +205,9 @@ class GreedyBustersAgent(BustersAgent):
              if livingGhosts[i+1]]
         return Directions.EAST
 
+
+previousLivingGhosts = -1
+
 class BasicAgentAA(BustersAgent):
 
     def registerInitialState(self, gameState):
@@ -262,17 +265,19 @@ class BasicAgentAA(BustersAgent):
         print( gameState.getWalls())
         # Score
         print("Score: ", gameState.getScore())
-        
     
-
+    
     def chooseAction(self, gameState):
+        global previousLivingGhosts
+        if previousLivingGhosts == -1: previousLivingGhosts = gameState.getLivingGhosts().count(True)
         self.countActions = self.countActions + 1
         self.printInfo(gameState)
         legal = gameState.getLegalActions(0) ##Legal position from the pacman
 
+        
         if len(legal) == 2: return legal[0]
-
         nearestLivingGhost = -1
+        livingGhosts = gameState.getLivingGhosts().count(True)
         i = 0
         while i < len(gameState.getLivingGhosts()) - 1:
             if gameState.getLivingGhosts()[i+1] == True:
@@ -286,15 +291,15 @@ class BasicAgentAA(BustersAgent):
         prevMove = gameState.data.agentStates[0].getDirection()
         best_move = legal[0]
         i = 0
-        while Directions.REVERSE[best_move] == prevMove or best_move == Directions.STOP:
+        while (Directions.REVERSE[best_move] == prevMove and livingGhosts == previousLivingGhosts) or best_move == Directions.STOP:
             i+=1
             best_move = legal[i]
-        if Directions.REVERSE[best_move] == prevMove: best_move = legal[1]
         for move in legal:
-            if Directions.REVERSE[move] != prevMove and move != Directions.STOP:
+            if (Directions.REVERSE[move] != prevMove or livingGhosts != previousLivingGhosts) and move != Directions.STOP:
                 if util.manhattanDistance(self.applyDirection( actualPosition, best_move), nearestGhostPositions) > util.manhattanDistance(self.applyDirection(actualPosition,move), nearestGhostPositions):
                     best_move = move
 
+        previousLivingGhosts = livingGhosts
         return best_move
 
     def applyDirection(self, xy, direction):
