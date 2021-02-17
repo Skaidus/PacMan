@@ -618,6 +618,8 @@ class Game(object):
         agentIndex = self.startingIndex
         numAgents = len( self.agents )
         step = 0
+        # Open the log to write the state
+        f = open("log.txt", "a")
         while not self.gameOver:
             # Fetch the next agent
             agent = self.agents[agentIndex]
@@ -648,8 +650,7 @@ class Game(object):
             else:
                 observation = self.state.deepCopy()
             if 'printLineData' in dir( agent ):
-                # Open the log to write the state
-                f = open("log.txt", "a")
+                
                 # If we just started, new play
                 if step == 0:
                     if os.stat("log.txt").st_size != 0:
@@ -657,7 +658,6 @@ class Game(object):
                 else:
                     f.write(",")    
                 f.write(agent.printLineData(observation))
-                f.close()
             # Solicit an action
             action = None
             step += 1
@@ -735,6 +735,7 @@ class Game(object):
                 boinc.set_fraction_done(self.getProgress())
 
         # inform a learning agent of the game result
+        f.close()
         for agentIndex, agent in enumerate(self.agents):
             if "final" in dir( agent ) :
                 try:
