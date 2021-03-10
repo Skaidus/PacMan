@@ -321,11 +321,26 @@ class BasicAgentAA(BustersAgent):
             return [xy[0], xy[1]+1]
 
     def printLineData(self, gameState):
-        return ''.join(("{PacmanPosition:"+str(gameState.getPacmanPosition()),
-        ";PacmanDirection:"+str(gameState.data.agentStates[0].getDirection()),
-        ";LegalPacmanActions:"+str(gameState.getLegalPacmanActions()),
-        ";GhostDistances:"+str(gameState.data.ghostDistances),
-        ";LivingGhosts:"+str(gameState.getLivingGhosts()),
-        ";GhostDirections:"+str(gameState.getGhostDirections()),
-        ";Score:"+str(gameState.getScore()),
-        ";Nearest:"+str(gameState.getDistanceNearestFood())+"}"))
+        ghostPositions = ""
+        for each in gameState.getGhostPositions():
+            ghostPositions += str(each[0]) + "," + str(each[1]) + ","
+
+        ghostDistances = ""
+        for each in gameState.data.ghostDistances:
+            if str(each) == "None":
+                ghostDistances += "0"
+            else:
+                ghostDistances += str(each)
+            ghostDistances += ","
+
+        ghostDirections = ""
+        for each in gameState.getGhostDirections():
+            ghostDirections += "\'" + str(gameState.getGhostDirections().get(each)) + "\'" + ","
+
+
+        return ''.join(str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1]) +
+        ","+str(gameState.getLegalPacmanActions())+
+        ","+ ghostPositions + ghostDistances + ghostDirections +
+        str(gameState.getScore()) +
+        ","+str(gameState.getDistanceNearestFood())+
+        ","+ "\'" + str(gameState.data.agentStates[0].getDirection()) + "\'")

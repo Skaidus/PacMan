@@ -655,36 +655,36 @@ class Game(object):
                 if step == 0:
                     if os.stat("log.txt").st_size ==0:
                         f.write(
-                     """@RELATION pacman-data
+'''@RELATION pacman-data
 
-                        @ATTRIBUTE PacmanPositionX NUMERIC
-                        @ATTRIBUTE PacmanPositionY NUMERIC
-                        @ATTRIBUTE LegalPacManActions {North, South, West, East, Stop}
-                        @ATTRIBUTE Ghost1PositionX NUMERIC
-                        @ATTRIBUTE Ghost1PositionY NUMERIC
-                        @ATTRIBUTE Ghost2PositionX NUMERIC
-                        @ATTRIBUTE Ghost2PositionY NUMERIC
-                        @ATTRIBUTE Ghost3PositionX NUMERIC
-                        @ATTRIBUTE Ghost3PositionY NUMERIC
-                        @ATTRIBUTE Ghost4PositionX NUMERIC
-                        @ATTRIBUTE Ghost4PositionY NUMERIC
-                        @ATTRIBUTE Ghost1Distance NUMERIC
-                        @ATTRIBUTE Ghost2Distance NUMERIC
-                        @ATTRIBUTE Ghost3Distance NUMERIC
-                        @ATTRIBUTE Ghost4Distance NUMERIC
-                        @ATTRIBUTE Ghost1Direction {North, South, West, East, Stop}
-                        @ATTRIBUTE Ghost2Direction {North, South, West, East, Stop}
-                        @ATTRIBUTE Ghost3Direction {North, South, West, East, Stop}
-                        @ATTRIBUTE Ghost4Direction {North, South, West, East, Stop}
-                        @ATTRIBUTE Score NUMERIC
-                        @ATTRIBUTE DistanceFood NUMERIC
-                        @ATTRIBUTE PacmanDirection {North, South, West, East, Stop}
+@ATTRIBUTE PacmanPositionX NUMERIC
+@ATTRIBUTE PacmanPositionY NUMERIC
+@ATTRIBUTE LegalPacManActions {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE Ghost1PositionX NUMERIC
+@ATTRIBUTE Ghost1PositionY NUMERIC
+@ATTRIBUTE Ghost2PositionX NUMERIC
+@ATTRIBUTE Ghost2PositionY NUMERIC
+@ATTRIBUTE Ghost3PositionX NUMERIC
+@ATTRIBUTE Ghost3PositionY NUMERIC
+@ATTRIBUTE Ghost4PositionX NUMERIC
+@ATTRIBUTE Ghost4PositionY NUMERIC
+@ATTRIBUTE Ghost1Distance NUMERIC
+@ATTRIBUTE Ghost2Distance NUMERIC
+@ATTRIBUTE Ghost3Distance NUMERIC
+@ATTRIBUTE Ghost4Distance NUMERIC
+@ATTRIBUTE Ghost1Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE Ghost2Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE Ghost3Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE Ghost4Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE Score NUMERIC
+@ATTRIBUTE DistanceFood NUMERIC
+@ATTRIBUTE PacmanDirection {'North', 'South', 'West', 'East', 'Stop'}
 
-                        @data\n""")
+@data\n''')
                     if os.stat("log.txt").st_size != 0:
                         f.write("\n")
                 else:
-                    f.write(",")    
+                    f.write("\n")
                 f.write(agent.printLineData(observation))
             # Solicit an action
             action = None
