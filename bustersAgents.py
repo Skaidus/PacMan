@@ -269,39 +269,47 @@ class BasicAgentAA(BustersAgent):
     
     def chooseAction(self, gameState):
         global previousLivingGhosts
+        # Inicializa el contador de fantasmas vivos en caso de que sea el primer turno
         if previousLivingGhosts == -1: previousLivingGhosts = gameState.getLivingGhosts().count(True)
         self.countActions = self.countActions + 1
         self.printInfo(gameState)
         legal = gameState.getLegalActions(0) ##Legal position from the pacman
 
-        
+        # Si solo hay una opción legal, devuelve esa
         if len(legal) == 2: return legal[0]
+        # Escoge un primer fantasma vivo arbitrario para empezar a buscar el más cercano
         nearestLivingGhost = -1
         livingGhosts = gameState.getLivingGhosts().count(True)
         i = 0
+        # Itera para hallar el fantasma más cercano a Pacman 
         while i < len(gameState.getLivingGhosts()) - 1:
             if gameState.getLivingGhosts()[i+1] == True:
                 currentGhostDistance = gameState.data.ghostDistances[i]
                 if(nearestLivingGhost == -1 or currentGhostDistance < gameState.data.ghostDistances[nearestLivingGhost]) :
                     nearestLivingGhost = i
             i += 1
-
+        # Almacena el resultado
         nearestGhostPositions = gameState.getGhostPositions()[nearestLivingGhost]
         actualPosition = gameState.getPacmanPosition()
         prevMove = gameState.data.agentStates[0].getDirection()
+        # Escoge un movimiento legal arbitrario
         best_move = legal[0]
         i = 0
+        # Itera para asegurarse que cumple las condiciones de no ser el movimiento inverso del anterior o que se quede parado
         while (Directions.REVERSE[best_move] == prevMove and livingGhosts == previousLivingGhosts) or best_move == Directions.STOP:
             i+=1
             best_move = legal[i]
+        # Itera sobre todos los legales con objetivo de encontrar uno que deje a Pacman a menor distancia y cumpla las restricciones
         for move in legal:
             if (Directions.REVERSE[move] != prevMove or livingGhosts != previousLivingGhosts) and move != Directions.STOP:
                 if util.manhattanDistance(self.applyDirection( actualPosition, best_move), nearestGhostPositions) > util.manhattanDistance(self.applyDirection(actualPosition,move), nearestGhostPositions):
                     best_move = move
 
+        # Actualiza el contador de fantasmas vivos
         previousLivingGhosts = livingGhosts
         return best_move
 
+    # Funcion auxiliar para predecir la posicion de pacman al aplicar una dirección
     def applyDirection(self, xy, direction):
         if direction == Directions.SOUTH:
             return [xy[0], xy[1]-1]
@@ -311,8 +319,6 @@ class BasicAgentAA(BustersAgent):
             return [xy[0]-1, xy[1]]
         else: 
             return [xy[0], xy[1]+1]
-
-       
 
     def printLineData(self, gameState):
         return ''.join(("{PacmanPosition:"+str(gameState.getPacmanPosition()),
