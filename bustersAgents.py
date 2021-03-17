@@ -105,6 +105,39 @@ class BustersAgent(object):
     def chooseAction(self, gameState):
         "By default, a BustersAgent just stops.  This should be overridden."
         return Directions.STOP
+    
+    def printLineData(self, gameState):
+        ghostPositions = ""
+        for each in gameState.getGhostPositions():
+            ghostPositions += str(each[0]) + "," + str(each[1]) + ","
+
+        ghostDistances = ""
+        for each in gameState.data.ghostDistances:
+            if str(each) == "None":
+                ghostDistances += "0"
+            else:
+                ghostDistances += str(each)
+            ghostDistances += ","
+
+        ghostDirections = ""
+        for each in gameState.getGhostDirections():
+            ghostDirections += "\'" + str(gameState.getGhostDirections().get(each)) + "\'" + ","
+        
+        moves = {'North', 'South', 'West', 'East', 'Stop'}
+        legalActions = ""
+        for move in moves:
+            if move in gameState.getLegalPacmanActions():
+                legalActions+='1,' 
+            else:
+                legalActions+='0,'
+        
+        return ''.join(str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1]) +
+
+        ","+ legalActions +
+        ghostPositions + ghostDistances + ghostDirections +
+        str(gameState.getScore()) +
+        ","+str(gameState.getDistanceNearestFood())+
+        ","+ "\'" + str(gameState.data.agentStates[0].getDirection()) + "\'")
 
 class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
     "An agent controlled by the keyboard that displays beliefs about ghost positions."
@@ -320,35 +353,4 @@ class BasicAgentAA(BustersAgent):
         else: 
             return [xy[0], xy[1]+1]
 
-    def printLineData(self, gameState):
-        ghostPositions = ""
-        for each in gameState.getGhostPositions():
-            ghostPositions += str(each[0]) + "," + str(each[1]) + ","
-
-        ghostDistances = ""
-        for each in gameState.data.ghostDistances:
-            if str(each) == "None":
-                ghostDistances += "0"
-            else:
-                ghostDistances += str(each)
-            ghostDistances += ","
-
-        ghostDirections = ""
-        for each in gameState.getGhostDirections():
-            ghostDirections += "\'" + str(gameState.getGhostDirections().get(each)) + "\'" + ","
-        
-        moves = {'North', 'South', 'West', 'East', 'Stop'}
-        legalActions = ""
-        for move in moves:
-            if move in gameState.getLegalPacmanActions():
-                legalActions+='1,' 
-            else:
-                legalActions+='0,'
-        
-        return ''.join(str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1]) +
-
-        ","+ legalActions +
-        ghostPositions + ghostDistances + ghostDirections +
-        str(gameState.getScore()) +
-        ","+str(gameState.getDistanceNearestFood())+
-        ","+ "\'" + str(gameState.data.agentStates[0].getDirection()) + "\'")
+    
