@@ -619,7 +619,7 @@ class Game(object):
         numAgents = len( self.agents )
         step = 0
         # Open the log to write the state
-        f = open("log.txt", "a")
+        f = open("log.arff", "a")
         while not self.gameOver:
             # Fetch the next agent
             agent = self.agents[agentIndex]
@@ -653,7 +653,7 @@ class Game(object):
                 
                 # If we just started, new play
                 if step == 0:
-                    if os.stat("log.txt").st_size ==0:
+                    if os.stat("log.arff").st_size ==0:
                         f.write(
 '''@RELATION pacman-data
 
@@ -681,7 +681,7 @@ class Game(object):
 @ATTRIBUTE PacmanDirection {'North', 'South', 'West', 'East', 'Stop'}
 
 @data\n''')
-                    if os.stat("log.txt").st_size != 0:
+                    if os.stat("log.arff").st_size != 0:
                         f.write("\n")
                 else:
                     f.write("\n")
