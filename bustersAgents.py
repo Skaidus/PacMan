@@ -124,6 +124,7 @@ class BustersAgent(object):
             ghostDirections += "\'" + str(gameState.getGhostDirections().get(each)) + "\'" + ","
         for i in range(4-len(ghostDirections)):
             ghostDirections+= "\'" + "Stop" + "\'" + ","
+
         moves = {'North', 'South', 'West', 'East', 'Stop'}
         legalActions = ""
         for move in moves:
@@ -131,13 +132,14 @@ class BustersAgent(object):
                 legalActions+='1,' 
             else:
                 legalActions+='0,'
-        
-        return ''.join(str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1]) +
 
+        distNearestFood = '-1' if str(gameState.getDistanceNearestFood()) == 'None' else str(gameState.getDistanceNearestFood())
+
+        return ''.join(str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1]) +
         ","+ legalActions +
         ghostPositions + ghostDistances + ghostDirections +
         str(gameState.getScore()) +
-        ","+str(gameState.getDistanceNearestFood())+
+        ","+ distNearestFood +
         ","+ "\'" + str(gameState.data.agentStates[0].getDirection()) + "\'")
 
 class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
