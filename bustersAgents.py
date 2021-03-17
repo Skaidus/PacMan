@@ -122,7 +122,8 @@ class BustersAgent(object):
         ghostDirections = ""
         for each in gameState.getGhostDirections():
             ghostDirections += "\'" + str(gameState.getGhostDirections().get(each)) + "\'" + ","
-        
+        for i in range(4-len(ghostDirections)):
+            ghostDirections+= "\'" + "Stop" + "\'" + ","
         moves = {'North', 'South', 'West', 'East', 'Stop'}
         legalActions = ""
         for move in moves:
