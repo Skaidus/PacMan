@@ -659,7 +659,11 @@ class Game(object):
 
 @ATTRIBUTE PacmanPositionX NUMERIC
 @ATTRIBUTE PacmanPositionY NUMERIC
-@ATTRIBUTE LegalPacManActions {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE LegalPacManNorth {0,1}
+@ATTRIBUTE LegalPacManSouth {0,1}
+@ATTRIBUTE LegalPacManWest {0,1}
+@ATTRIBUTE LegalPacManEast {0,1}
+@ATTRIBUTE LegalPacManStop {0,1}
 @ATTRIBUTE Ghost1PositionX NUMERIC
 @ATTRIBUTE Ghost1PositionY NUMERIC
 @ATTRIBUTE Ghost2PositionX NUMERIC
@@ -678,7 +682,7 @@ class Game(object):
 @ATTRIBUTE Ghost4Direction {'North', 'South', 'West', 'East', 'Stop'}
 @ATTRIBUTE Score NUMERIC
 @ATTRIBUTE DistanceFood NUMERIC
-@ATTRIBUTE PacmanDirection {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE class {'North', 'South', 'West', 'East', 'Stop'}
 
 @data\n''')
                     if os.stat("log.arff").st_size != 0:

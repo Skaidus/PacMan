@@ -336,11 +336,19 @@ class BasicAgentAA(BustersAgent):
         ghostDirections = ""
         for each in gameState.getGhostDirections():
             ghostDirections += "\'" + str(gameState.getGhostDirections().get(each)) + "\'" + ","
-
-
+        
+        moves = {'North', 'South', 'West', 'East', 'Stop'}
+        legalActions = ""
+        for move in moves:
+            if move in gameState.getLegalPacmanActions():
+                legalActions+='1,' 
+            else:
+                legalActions+='0,'
+        
         return ''.join(str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1]) +
-        ","+str(gameState.getLegalPacmanActions())+
-        ","+ ghostPositions + ghostDistances + ghostDirections +
+
+        ","+ legalActions +
+        ghostPositions + ghostDistances + ghostDirections +
         str(gameState.getScore()) +
         ","+str(gameState.getDistanceNearestFood())+
         ","+ "\'" + str(gameState.data.agentStates[0].getDirection()) + "\'")
