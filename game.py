@@ -659,6 +659,7 @@ class Game(object):
 
 @ATTRIBUTE PacmanPositionX NUMERIC
 @ATTRIBUTE PacmanPositionY NUMERIC
+@ATTRIBUTE Ghosts NUMERIC
 @ATTRIBUTE LegalPacManNorth {0,1}
 @ATTRIBUTE LegalPacManSouth {0,1}
 @ATTRIBUTE LegalPacManWest {0,1}
@@ -682,14 +683,41 @@ class Game(object):
 @ATTRIBUTE Ghost4Direction {'North', 'South', 'West', 'East', 'Stop'}
 @ATTRIBUTE Score NUMERIC
 @ATTRIBUTE DistanceFood NUMERIC
+@ATTRIBUTE RemainingFood NUMERIC
 @ATTRIBUTE class {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE NextPacmanPositionX NUMERIC
+@ATTRIBUTE NextPacmanPositionY NUMERIC
+@ATTRIBUTE NextLegalPacManNorth {0,1}
+@ATTRIBUTE NextLegalPacManSouth {0,1}
+@ATTRIBUTE NextLegalPacManWest {0,1}
+@ATTRIBUTE NextLegalPacManEast {0,1}
+@ATTRIBUTE NextLegalPacManStop {0,1}
+@ATTRIBUTE NextGhost1PositionX NUMERIC
+@ATTRIBUTE NextGhost1PositionY NUMERIC
+@ATTRIBUTE NextGhost2PositionX NUMERIC
+@ATTRIBUTE NextGhost2PositionY NUMERIC
+@ATTRIBUTE NextGhost3PositionX NUMERIC
+@ATTRIBUTE NextGhost3PositionY NUMERIC
+@ATTRIBUTE NextGhost4PositionX NUMERIC
+@ATTRIBUTE NextGhost4PositionY NUMERIC
+@ATTRIBUTE NextGhost1Distance NUMERIC
+@ATTRIBUTE NextGhost2Distance NUMERIC
+@ATTRIBUTE NextGhost3Distance NUMERIC
+@ATTRIBUTE NextGhost4Distance NUMERIC
+@ATTRIBUTE NextGhost1Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE NextGhost2Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE NextGhost3Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE NextGhost4Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE NextScore NUMERIC
+@ATTRIBUTE NextDistanceFood NUMERIC
+@ATTRIBUTE NextRemainingFood NUMERIC
+@ATTRIBUTE NextPacmanDirection {'North', 'South', 'West', 'East', 'Stop'}
+
 
 @data\n''')
                     if os.stat("log.arff").st_size != 0:
                         f.write("\n")
-                else:
-                    f.write("\n")
-                f.write(agent.printLineData(observation))
+                f.write(agent.printLineData(observation, step))
             # Solicit an action
             action = None
             step += 1

@@ -106,7 +106,8 @@ class BustersAgent(object):
         "By default, a BustersAgent just stops.  This should be overridden."
         return Directions.STOP
     
-    def printLineData(self, gameState):
+    def printLineData(self, gameState, step):
+
         ghostPositions = ""
         for each in gameState.getGhostPositions():
             ghostPositions += str(each[0]) + "," + str(each[1]) + ","
@@ -135,12 +136,28 @@ class BustersAgent(object):
 
         distNearestFood = '-1' if str(gameState.getDistanceNearestFood()) == 'None' else str(gameState.getDistanceNearestFood())
 
-        return ''.join(str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1]) +
+
+        if step == 0: 
+            next_state = ''
+        else: 
+            next_state =  ''.join(str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1]) +
+            ","+ legalActions +
+            ghostPositions + ghostDistances + ghostDirections +
+            str(gameState.getScore()) +
+            ","+ distNearestFood +
+            ","+ str(gameState.getNumFood()) +
+            ","+ "\'" + str(gameState.data.agentStates[0].getDirection()) + "\'" + "\n")
+
+        current_state = ''.join(str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1]) +
+        "," +  str(gameState.getNumAgents() - 1) +
         ","+ legalActions +
         ghostPositions + ghostDistances + ghostDirections +
         str(gameState.getScore()) +
         ","+ distNearestFood +
-        ","+ "\'" + str(gameState.data.agentStates[0].getDirection()) + "\'")
+        ","+ str(gameState.getNumFood()) +
+        ","+ "\'" + str(gameState.data.agentStates[0].getDirection()) + "\'" + ",")
+
+        return next_state + current_state
 
 class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
     "An agent controlled by the keyboard that displays beliefs about ghost positions."
