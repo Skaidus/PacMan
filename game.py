@@ -684,7 +684,7 @@ class Game(object):
 @ATTRIBUTE Score NUMERIC
 @ATTRIBUTE DistanceFood NUMERIC
 @ATTRIBUTE RemainingFood NUMERIC
-@ATTRIBUTE class {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE class {'North', 'South', 'West', 'East'}
 @ATTRIBUTE NextPacmanPositionX NUMERIC
 @ATTRIBUTE NextPacmanPositionY NUMERIC
 @ATTRIBUTE NextLegalPacManNorth {0,1}
@@ -711,7 +711,7 @@ class Game(object):
 @ATTRIBUTE NextScore NUMERIC
 @ATTRIBUTE NextDistanceFood NUMERIC
 @ATTRIBUTE NextRemainingFood NUMERIC
-@ATTRIBUTE NextPacmanDirection {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE NextPacmanDirection {'North', 'South', 'West', 'East'}
 
 
 @data\n''')
