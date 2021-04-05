@@ -677,10 +677,10 @@ class Game(object):
 @ATTRIBUTE Ghost2Distance NUMERIC
 @ATTRIBUTE Ghost3Distance NUMERIC
 @ATTRIBUTE Ghost4Distance NUMERIC
-@ATTRIBUTE Ghost1Direction {'North', 'South', 'West', 'East', 'Stop'}
-@ATTRIBUTE Ghost2Direction {'North', 'South', 'West', 'East', 'Stop'}
-@ATTRIBUTE Ghost3Direction {'North', 'South', 'West', 'East', 'Stop'}
-@ATTRIBUTE Ghost4Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE Ghost1Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE Ghost2Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE Ghost3Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE Ghost4Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
 @ATTRIBUTE Score NUMERIC
 @ATTRIBUTE DistanceFood NUMERIC
 @ATTRIBUTE RemainingFood NUMERIC
@@ -704,10 +704,10 @@ class Game(object):
 @ATTRIBUTE NextGhost2Distance NUMERIC
 @ATTRIBUTE NextGhost3Distance NUMERIC
 @ATTRIBUTE NextGhost4Distance NUMERIC
-@ATTRIBUTE NextGhost1Direction {'North', 'South', 'West', 'East', 'Stop'}
-@ATTRIBUTE NextGhost2Direction {'North', 'South', 'West', 'East', 'Stop'}
-@ATTRIBUTE NextGhost3Direction {'North', 'South', 'West', 'East', 'Stop'}
-@ATTRIBUTE NextGhost4Direction {'North', 'South', 'West', 'East', 'Stop'}
+@ATTRIBUTE NextGhost1Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE NextGhost2Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE NextGhost3Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE NextGhost4Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
 @ATTRIBUTE NextScore NUMERIC
 @ATTRIBUTE NextDistanceFood NUMERIC
 @ATTRIBUTE NextRemainingFood NUMERIC

@@ -109,22 +109,27 @@ class BustersAgent(object):
     def printLineData(self, gameState, step):
 
         ghostPositions = ""
-        for each in gameState.getGhostPositions():
-            ghostPositions += str(each[0]) + "," + str(each[1]) + ","
+        for i in range(len(gameState.getGhostPositions())):
+            if gameState.data.ghostDistances[i]==None:
+                ghostPositions += str(-1) + "," + str(-1) + ","
+            else :
+                ghostPositions += str(gameState.getGhostPositions()[i][0]) + "," + str(gameState.getGhostPositions()[i][1]) + ","
 
         ghostDistances = ""
         for each in gameState.data.ghostDistances:
-            if str(each) == "None":
-                ghostDistances += "0"
+            if each == None:
+                ghostDistances += str(-1)
             else:
                 ghostDistances += str(each)
             ghostDistances += ","
-
         ghostDirections = ""
-        for each in gameState.getGhostDirections():
-            ghostDirections += "\'" + str(gameState.getGhostDirections().get(each)) + "\'" + ","
-        for i in range(4-len(ghostDirections)):
-            ghostDirections+= "\'" + "Stop" + "\'" + ","
+        for i in range(len(gameState.getGhostDirections())):
+            if gameState.data.ghostDistances[i]==None:
+                ghostDirections += "\'" + "Dead" + "\'" + ","
+            else: 
+                ghostDirections += "\'" + str(gameState.getGhostDirections()[i]) + "\'" + ","
+        for i in range(4-len(gameState.getGhostDirections())):
+            ghostDirections+= "\'" + "Dead" + "\'" + ","
 
         moves = {'North', 'South', 'West', 'East', 'Stop'}
         legalActions = ""
