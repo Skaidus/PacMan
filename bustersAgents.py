@@ -77,8 +77,10 @@ class BustersAgent(object):
         self.inferenceModules = [inferenceType(a) for a in ghostAgents]
         self.observeEnable = observeEnable
         self.elapseTimeEnable = elapseTimeEnable
+        self.previous_turn = None #Para hacer predicción de regresión
         self.weka = Weka()
         self.weka.start_jvm()
+        self.clasiffication_trust = 0.2 # Confianza
 
     def registerInitialState(self, gameState):
         "Initializes beliefs and inference modules"
@@ -110,25 +112,38 @@ class BustersAgent(object):
     def chooseAction(self, gameState):
         "By default, a BustersAgent just stops.  This should be overridden."
         x = self.getClassifierStatus(gameState)
-        a = self.weka.predict("./Random.model", x, "./training_set.arff")
+        y = self.getRegressionStatus(gameState)
+        a = self.weka.predict("./Random.model", x, "./training_set_c.arff")
+        best_move = str(gameState.getLegalPacmanActions()[0])
+        print(y.copy()+[best_move])
+        score = self.weka.predict("./Regression.model", y.copy()+[best_move], "./training_set_r.arff")
+        for move in gameState.getLegalPacmanActions():
+            candidate = self.weka.predict("./Regression.model", y.copy()+[move], "./training_set_r.arff")
+            if candidate>score:
+                score = candidate
+                best_move = move
+        if random.random()<self.clasiffication_trust:
+            best_move = a
 
-        if a in gameState.getLegalPacmanActions():
-            return a
+        if best_move in gameState.getLegalPacmanActions():
+            return best_move
         else: 
             return random.choice(gameState.getLegalPacmanActions())
 
     def getClassifierStatus(self, gameState):
 
         classifierStatus = []
-
+        #Pacman position
         for i in range(2):
             classifierStatus.append(str(gameState.getPacmanPosition()[i]))
+        #Pacman legal moves
         moves = {'North', 'South', 'West', 'East'}
         for move in moves:
             if move in gameState.getLegalPacmanActions():
                 classifierStatus.append('1')
             else:
                 classifierStatus.append('0')
+        #Ghost positions
         for i in range(len(gameState.getGhostPositions())):
             if gameState.data.ghostDistances[i]==None:
                 for j in range(2):
@@ -136,30 +151,33 @@ class BustersAgent(object):
             else :
                 for j in range(2):
                     classifierStatus.append(str(gameState.getGhostPositions()[i][j]))
+        #Ghost distances                    
         for each in gameState.data.ghostDistances:
             if each == None:
                 classifierStatus.append(str(-1))
             else:
                 classifierStatus.append(str(each))
+        #Score
         classifierStatus.append(str(gameState.getScore()))
+        #DistanceFood
         classifierStatus.append("-1") if str(gameState.getDistanceNearestFood()) == 'None' else classifierStatus.append(str(gameState.getDistanceNearestFood()))
+        #RemainingFood
         classifierStatus.append(str(gameState.getNumFood()))
-
         return classifierStatus
 
-
-    def getStatus(self, gameState):
-
+    def getRegressionStatus(self, gameState):
         classifierStatus = []
-
+        #Pacman position
         for i in range(2):
             classifierStatus.append(str(gameState.getPacmanPosition()[i]))
+        #Pacman legal moves
         moves = {'North', 'South', 'West', 'East', 'Stop'}
         for move in moves:
             if move in gameState.getLegalPacmanActions():
                 classifierStatus.append('1')
             else:
                 classifierStatus.append('0')
+        #Ghost positions
         for i in range(len(gameState.getGhostPositions())):
             if gameState.data.ghostDistances[i]==None:
                 for j in range(2):
@@ -167,11 +185,52 @@ class BustersAgent(object):
             else :
                 for j in range(2):
                     classifierStatus.append(str(gameState.getGhostPositions()[i][j]))
+        #Ghost distances                    
         for each in gameState.data.ghostDistances:
             if each == None:
                 classifierStatus.append(str(-1))
             else:
                 classifierStatus.append(str(each))
+        #DistanceFood
+        classifierStatus.append("-1") if str(gameState.getDistanceNearestFood()) == 'None' else classifierStatus.append(str(gameState.getDistanceNearestFood()))
+        #RemainingFood
+        classifierStatus.append(str(gameState.getNumFood()))
+        if not self.previous_turn:
+            self.previous_turn = self.getPreviousStatus(gameState)
+            return self.previous_turn.copy() + classifierStatus
+        else: 
+            regression = self.previous_turn.copy() + classifierStatus
+            self.previous_turn = self.getPreviousStatus(gameState)
+            return regression
+
+    def getPreviousStatus(self, gameState):
+
+        classifierStatus = []
+        #Pacman position
+        for i in range(2):
+            classifierStatus.append(str(gameState.getPacmanPosition()[i]))
+        #Pacman legal moves
+        moves = ['North', 'South', 'West', 'East', 'Stop']
+        for move in moves:
+            if move in gameState.getLegalPacmanActions():
+                classifierStatus.append('1')
+            else:
+                classifierStatus.append('0')
+        #Ghost positions
+        for i in range(len(gameState.getGhostPositions())):
+            if gameState.data.ghostDistances[i]==None:
+                for j in range(2):
+                    classifierStatus.append(str(-1))
+            else :
+                for j in range(2):
+                    classifierStatus.append(str(gameState.getGhostPositions()[i][j]))
+        #Ghost distances                    
+        for each in gameState.data.ghostDistances:
+            if each == None:
+                classifierStatus.append(str(-1))
+            else:
+                classifierStatus.append(str(each))
+        #Ghost directions
         for i in range(len(gameState.getGhostDirections())):
             if gameState.data.ghostDistances[i]==None:
                 classifierStatus.append("Dead")
@@ -179,13 +238,19 @@ class BustersAgent(object):
                 classifierStatus.append(str(gameState.getGhostDirections()[i]))
         for i in range(4-len(gameState.getGhostDirections())):
             classifierStatus.append("Dead")
-
-
+        #Score
         classifierStatus.append(str(gameState.getScore()))
+        #DistanceFood
         classifierStatus.append("-1") if str(gameState.getDistanceNearestFood()) == 'None' else classifierStatus.append(str(gameState.getDistanceNearestFood()))
+        #RemainingFood
         classifierStatus.append(str(gameState.getNumFood()))
-
-    return classifierStatus
+        #PacMan Direction
+        moves = ['North', 'South', 'West', 'East']
+        if str(gameState.data.agentStates[0].getDirection()) == "Stop":
+            classifierStatus.append(str(random.choice(moves)))
+        else: 
+            classifierStatus.append(str(gameState.data.agentStates[0].getDirection()))
+        return classifierStatus
 
 
 
