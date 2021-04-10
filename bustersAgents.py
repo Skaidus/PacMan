@@ -1,5 +1,6 @@
 from __future__ import print_function
 from wekaI import Weka
+import random
 
 # bustersAgents.py
 # ----------------
@@ -76,8 +77,8 @@ class BustersAgent(object):
         self.inferenceModules = [inferenceType(a) for a in ghostAgents]
         self.observeEnable = observeEnable
         self.elapseTimeEnable = elapseTimeEnable
-        #self.weka = Weka()
-        #self.weka.start_jvm()
+        self.weka = Weka()
+        self.weka.start_jvm()
 
     def registerInitialState(self, gameState):
         "Initializes beliefs and inference modules"
@@ -109,10 +110,45 @@ class BustersAgent(object):
     def chooseAction(self, gameState):
         "By default, a BustersAgent just stops.  This should be overridden."
         x = self.getClassifierStatus(gameState)
-        a = self.weka.predict("./j48.model", x, "./training_set.arff")
-        return a
+        a = self.weka.predict("./Random.model", x, "./training_set.arff")
+
+        if a in gameState.getLegalPacmanActions():
+            return a
+        else: 
+            return random.choice(gameState.getLegalPacmanActions())
 
     def getClassifierStatus(self, gameState):
+
+        classifierStatus = []
+
+        for i in range(2):
+            classifierStatus.append(str(gameState.getPacmanPosition()[i]))
+        moves = {'North', 'South', 'West', 'East'}
+        for move in moves:
+            if move in gameState.getLegalPacmanActions():
+                classifierStatus.append('1')
+            else:
+                classifierStatus.append('0')
+        for i in range(len(gameState.getGhostPositions())):
+            if gameState.data.ghostDistances[i]==None:
+                for j in range(2):
+                    classifierStatus.append(str(-1))
+            else :
+                for j in range(2):
+                    classifierStatus.append(str(gameState.getGhostPositions()[i][j]))
+        for each in gameState.data.ghostDistances:
+            if each == None:
+                classifierStatus.append(str(-1))
+            else:
+                classifierStatus.append(str(each))
+        classifierStatus.append(str(gameState.getScore()))
+        classifierStatus.append("-1") if str(gameState.getDistanceNearestFood()) == 'None' else classifierStatus.append(str(gameState.getDistanceNearestFood()))
+        classifierStatus.append(str(gameState.getNumFood()))
+
+        return classifierStatus
+
+
+    def getStatus(self, gameState):
 
         classifierStatus = []
 
@@ -126,21 +162,33 @@ class BustersAgent(object):
                 classifierStatus.append('0')
         for i in range(len(gameState.getGhostPositions())):
             if gameState.data.ghostDistances[i]==None:
-                classifierStatus.append(str(-1) + "," + str(-1) + ",")
+                for j in range(2):
+                    classifierStatus.append(str(-1))
             else :
-                classifierStatus.append(str(gameState.getGhostPositions()[i][0]) + "," + str(gameState.getGhostPositions()[i][1]) + ",")
+                for j in range(2):
+                    classifierStatus.append(str(gameState.getGhostPositions()[i][j]))
         for each in gameState.data.ghostDistances:
             if each == None:
                 classifierStatus.append(str(-1))
             else:
                 classifierStatus.append(str(each))
+        for i in range(len(gameState.getGhostDirections())):
+            if gameState.data.ghostDistances[i]==None:
+                classifierStatus.append("Dead")
+            else: 
+                classifierStatus.append(str(gameState.getGhostDirections()[i]))
+        for i in range(4-len(gameState.getGhostDirections())):
+            classifierStatus.append("Dead")
+
+
         classifierStatus.append(str(gameState.getScore()))
         classifierStatus.append("-1") if str(gameState.getDistanceNearestFood()) == 'None' else classifierStatus.append(str(gameState.getDistanceNearestFood()))
         classifierStatus.append(str(gameState.getNumFood()))
 
-        return classifierStatus
+    return classifierStatus
 
-        
+
+
     def printLineData(self, gameState, step):
 
         ghostPositions = ""
