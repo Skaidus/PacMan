@@ -1,6 +1,7 @@
 from __future__ import print_function
 from wekaI import Weka
 import random
+from sys import maxsize
 
 # bustersAgents.py
 # ----------------
@@ -80,7 +81,9 @@ class BustersAgent(object):
         self.previous_turn = None #Para hacer predicción de regresión
         self.weka = Weka()
         self.weka.start_jvm()
-        self.clasiffication_trust = 0.2 # Confianza
+        # Confianza en el modelo de clasificación
+        # El de regresión tendrá una confianza de 1-este valor
+        self.clasiffication_trust = 0.5 
 
     def registerInitialState(self, gameState):
         "Initializes beliefs and inference modules"
@@ -115,13 +118,14 @@ class BustersAgent(object):
         y = self.getRegressionStatus(gameState)
         a = self.weka.predict("./Random.model", x, "./training_set_c.arff")
         best_move = str(gameState.getLegalPacmanActions()[0])
-        print(y.copy()+[best_move])
-        score = self.weka.predict("./Regression.model", y.copy()+[best_move], "./training_set_r.arff")
-        for move in gameState.getLegalPacmanActions():
-            candidate = self.weka.predict("./Regression.model", y.copy()+[move], "./training_set_r.arff")
-            if candidate>score:
-                score = candidate
-                best_move = move
+        score = -1*maxsize
+        moves = {'North', 'South', 'West', 'East'}
+        for move in moves:
+            if move in gameState.getLegalPacmanActions():
+                candidate = self.weka.predict("./Regression.model", y.copy()+[move], "./training_set_r.arff")
+                if candidate>score:
+                    score = candidate
+                    best_move = move
         if random.random()<self.clasiffication_trust:
             best_move = a
 
