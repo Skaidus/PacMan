@@ -82,7 +82,7 @@ class BustersAgent(object):
         self.weka = Weka()
         self.weka.start_jvm()
         # Para escoger cual clasificador se aplicará
-        self.umbrales_confianza = [0.5, 1, 0]
+        self.umbral_confianza = .6
 
     def registerInitialState(self, gameState):
         "Initializes beliefs and inference modules"
@@ -114,16 +114,12 @@ class BustersAgent(object):
     def chooseAction(self, gameState):
         "By default, a BustersAgent just stops.  This should be overridden."
         x = self.getClassifierStatus(gameState)
-        y = self.getRegressionStatus(gameState)
-        j48 = self.weka.predict("./J48.model", x.copy(), "./training_set_c.arff")
         tree = self.weka.predict("./RandomTree.model", x.copy(), "./training_set_c.arff")
         lwl = self.weka.predict("./LWL.model", x.copy(), "./training_set_c.arff")
         seed = random.random()
-        if seed < self.umbrales_confianza[0]:
-            best_move = j48
-        elif seed < self.umbrales_confianza[1]:
+        if seed < self.umbral_confianza:
             best_move = tree
-        elif seed <= self.umbrales_confianza[2]:
+        else:
             best_move = lwl
         moves = ['North', 'South', 'West', 'East']
         best_move = best_move.tolist()
