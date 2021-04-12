@@ -59,12 +59,8 @@ class Weka:
 		# Realiza la prediccion		
 		inst = Instance.create_instance(x) 
 		inst.dataset = data
-		pred = cls.classify_instance(inst)
-		if data.class_attribute.is_nominal:
-			pred =  data.class_attribute.value(pred)
 		if(debug): print("Prediction", pred)
-
-		return pred
+		return cls.distribution_for_instance(inst)
 
 ################################# DEBUG ##############################################
 #weka = Weka()

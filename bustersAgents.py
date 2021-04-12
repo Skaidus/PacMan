@@ -81,9 +81,8 @@ class BustersAgent(object):
         self.previous_turn = None #Para hacer predicción de regresión
         self.weka = Weka()
         self.weka.start_jvm()
-        # Confianza en el modelo de clasificación
-        # El de regresión tendrá una confianza de 1-este valor
-        self.clasiffication_trust = 0.5 
+        # Para escoger cual clasificador se aplicará
+        self.umbrales_confianza = [0.5, 1, 0]
 
     def registerInitialState(self, gameState):
         "Initializes beliefs and inference modules"
@@ -116,23 +115,30 @@ class BustersAgent(object):
         "By default, a BustersAgent just stops.  This should be overridden."
         x = self.getClassifierStatus(gameState)
         y = self.getRegressionStatus(gameState)
-        a = self.weka.predict("./Random.model", x, "./training_set_c.arff")
-        best_move = str(gameState.getLegalPacmanActions()[0])
-        score = -1*maxsize
-        moves = {'North', 'South', 'West', 'East'}
-        for move in moves:
-            if move in gameState.getLegalPacmanActions():
-                candidate = self.weka.predict("./Regression.model", y.copy()+[move], "./training_set_r.arff")
-                if candidate>score:
-                    score = candidate
-                    best_move = move
-        if random.random()<self.clasiffication_trust:
-            best_move = a
+        j48 = self.weka.predict("./J48.model", x.copy(), "./training_set_c.arff")
+        tree = self.weka.predict("./RandomTree.model", x.copy(), "./training_set_c.arff")
+        lwl = self.weka.predict("./LWL.model", x.copy(), "./training_set_c.arff")
+        seed = random.random()
+        if seed < self.umbrales_confianza[0]:
+            best_move = j48
+        elif seed < self.umbrales_confianza[1]:
+            best_move = tree
+        elif seed <= self.umbrales_confianza[2]:
+            best_move = lwl
+        moves = ['North', 'South', 'West', 'East']
+        best_move = best_move.tolist()
+        moves, best_move = self.eliminate_illegal(gameState.getLegalPacmanActions(), moves, best_move)
+        return moves[best_move.index(max(best_move))]
 
-        if best_move in gameState.getLegalPacmanActions():
-            return best_move
-        else: 
-            return random.choice(gameState.getLegalPacmanActions())
+    def eliminate_illegal(self, legal, moves, chances):
+        removed = []
+        new_chances = []
+        new_moves = []
+        for i in range(len(moves)):
+            if moves[i] in legal:
+                new_chances.append(chances[i])
+                new_moves.append(moves[i])
+        return new_moves, new_chances
 
     def getClassifierStatus(self, gameState):
 
