@@ -78,7 +78,6 @@ class BustersAgent(object):
         self.inferenceModules = [inferenceType(a) for a in ghostAgents]
         self.observeEnable = observeEnable
         self.elapseTimeEnable = elapseTimeEnable
-        self.previous_turn = None #Para hacer predicción de regresión
         self.weka = Weka()
         self.weka.start_jvm()
         # Para escoger cual clasificador se aplicará
