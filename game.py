@@ -32,6 +32,67 @@ import time, os
 import traceback
 import sys
 
+wekaString = '''@RELATION pacman-data
+
+@ATTRIBUTE PacmanPositionX NUMERIC
+@ATTRIBUTE PacmanPositionY NUMERIC
+@ATTRIBUTE Ghosts NUMERIC
+@ATTRIBUTE LegalPacManNorth {0,1}
+@ATTRIBUTE LegalPacManSouth {0,1}
+@ATTRIBUTE LegalPacManWest {0,1}
+@ATTRIBUTE LegalPacManEast {0,1}
+@ATTRIBUTE LegalPacManStop {0,1}
+@ATTRIBUTE Ghost1PositionX NUMERIC
+@ATTRIBUTE Ghost1PositionY NUMERIC
+@ATTRIBUTE Ghost2PositionX NUMERIC
+@ATTRIBUTE Ghost2PositionY NUMERIC
+@ATTRIBUTE Ghost3PositionX NUMERIC
+@ATTRIBUTE Ghost3PositionY NUMERIC
+@ATTRIBUTE Ghost4PositionX NUMERIC
+@ATTRIBUTE Ghost4PositionY NUMERIC
+@ATTRIBUTE Ghost1Distance NUMERIC
+@ATTRIBUTE Ghost2Distance NUMERIC
+@ATTRIBUTE Ghost3Distance NUMERIC
+@ATTRIBUTE Ghost4Distance NUMERIC
+@ATTRIBUTE Ghost1Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE Ghost2Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE Ghost3Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE Ghost4Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE Score NUMERIC
+@ATTRIBUTE DistanceFood NUMERIC
+@ATTRIBUTE RemainingFood NUMERIC
+@ATTRIBUTE class {'North', 'South', 'West', 'East'}
+@ATTRIBUTE NextPacmanPositionX NUMERIC
+@ATTRIBUTE NextPacmanPositionY NUMERIC
+@ATTRIBUTE NextLegalPacManNorth {0,1}
+@ATTRIBUTE NextLegalPacManSouth {0,1}
+@ATTRIBUTE NextLegalPacManWest {0,1}
+@ATTRIBUTE NextLegalPacManEast {0,1}
+@ATTRIBUTE NextLegalPacManStop {0,1}
+@ATTRIBUTE NextGhost1PositionX NUMERIC
+@ATTRIBUTE NextGhost1PositionY NUMERIC
+@ATTRIBUTE NextGhost2PositionX NUMERIC
+@ATTRIBUTE NextGhost2PositionY NUMERIC
+@ATTRIBUTE NextGhost3PositionX NUMERIC
+@ATTRIBUTE NextGhost3PositionY NUMERIC
+@ATTRIBUTE NextGhost4PositionX NUMERIC
+@ATTRIBUTE NextGhost4PositionY NUMERIC
+@ATTRIBUTE NextGhost1Distance NUMERIC
+@ATTRIBUTE NextGhost2Distance NUMERIC
+@ATTRIBUTE NextGhost3Distance NUMERIC
+@ATTRIBUTE NextGhost4Distance NUMERIC
+@ATTRIBUTE NextGhost1Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE NextGhost2Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE NextGhost3Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE NextGhost4Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
+@ATTRIBUTE NextScore NUMERIC
+@ATTRIBUTE NextDistanceFood NUMERIC
+@ATTRIBUTE NextRemainingFood NUMERIC
+@ATTRIBUTE NextPacmanDirection {'North', 'South', 'West', 'East'}
+
+
+@data\n'''
+
 #######################
 # Parts worth reading #
 #######################
@@ -620,6 +681,8 @@ class Game(object):
         step = 0
         # Open the log to write the state
         f = open("log.arff", "a")
+
+        ### <GAME LOOP>
         while not self.gameOver:
             # Fetch the next agent
             agent = self.agents[agentIndex]
@@ -627,7 +690,8 @@ class Game(object):
             move_time = 0
             skip_action = False
                 
-            # Generate an observation of the state
+            #{ STATE 
+                # If Pacman
             if 'observationFunction' in dir( agent ):
                 self.mute(agentIndex)
                 if self.catchExceptions:
@@ -647,81 +711,28 @@ class Game(object):
                 else:
                     observation = agent.observationFunction(self.state.deepCopy())
                 self.unmute()
+                # If Ghost
             else:
                 observation = self.state.deepCopy()
+            # STATE }
+
+            # {WEKA
             if 'printLineData' in dir( agent ):
                 
                 # If we just started, new play
                 if step == 0:
                     if os.stat("log.arff").st_size ==0:
-                        f.write(
-'''@RELATION pacman-data
-
-@ATTRIBUTE PacmanPositionX NUMERIC
-@ATTRIBUTE PacmanPositionY NUMERIC
-@ATTRIBUTE Ghosts NUMERIC
-@ATTRIBUTE LegalPacManNorth {0,1}
-@ATTRIBUTE LegalPacManSouth {0,1}
-@ATTRIBUTE LegalPacManWest {0,1}
-@ATTRIBUTE LegalPacManEast {0,1}
-@ATTRIBUTE LegalPacManStop {0,1}
-@ATTRIBUTE Ghost1PositionX NUMERIC
-@ATTRIBUTE Ghost1PositionY NUMERIC
-@ATTRIBUTE Ghost2PositionX NUMERIC
-@ATTRIBUTE Ghost2PositionY NUMERIC
-@ATTRIBUTE Ghost3PositionX NUMERIC
-@ATTRIBUTE Ghost3PositionY NUMERIC
-@ATTRIBUTE Ghost4PositionX NUMERIC
-@ATTRIBUTE Ghost4PositionY NUMERIC
-@ATTRIBUTE Ghost1Distance NUMERIC
-@ATTRIBUTE Ghost2Distance NUMERIC
-@ATTRIBUTE Ghost3Distance NUMERIC
-@ATTRIBUTE Ghost4Distance NUMERIC
-@ATTRIBUTE Ghost1Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
-@ATTRIBUTE Ghost2Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
-@ATTRIBUTE Ghost3Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
-@ATTRIBUTE Ghost4Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
-@ATTRIBUTE Score NUMERIC
-@ATTRIBUTE DistanceFood NUMERIC
-@ATTRIBUTE RemainingFood NUMERIC
-@ATTRIBUTE class {'North', 'South', 'West', 'East'}
-@ATTRIBUTE NextPacmanPositionX NUMERIC
-@ATTRIBUTE NextPacmanPositionY NUMERIC
-@ATTRIBUTE NextLegalPacManNorth {0,1}
-@ATTRIBUTE NextLegalPacManSouth {0,1}
-@ATTRIBUTE NextLegalPacManWest {0,1}
-@ATTRIBUTE NextLegalPacManEast {0,1}
-@ATTRIBUTE NextLegalPacManStop {0,1}
-@ATTRIBUTE NextGhost1PositionX NUMERIC
-@ATTRIBUTE NextGhost1PositionY NUMERIC
-@ATTRIBUTE NextGhost2PositionX NUMERIC
-@ATTRIBUTE NextGhost2PositionY NUMERIC
-@ATTRIBUTE NextGhost3PositionX NUMERIC
-@ATTRIBUTE NextGhost3PositionY NUMERIC
-@ATTRIBUTE NextGhost4PositionX NUMERIC
-@ATTRIBUTE NextGhost4PositionY NUMERIC
-@ATTRIBUTE NextGhost1Distance NUMERIC
-@ATTRIBUTE NextGhost2Distance NUMERIC
-@ATTRIBUTE NextGhost3Distance NUMERIC
-@ATTRIBUTE NextGhost4Distance NUMERIC
-@ATTRIBUTE NextGhost1Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
-@ATTRIBUTE NextGhost2Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
-@ATTRIBUTE NextGhost3Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
-@ATTRIBUTE NextGhost4Direction {'North', 'South', 'West', 'East', 'Stop', 'Dead'}
-@ATTRIBUTE NextScore NUMERIC
-@ATTRIBUTE NextDistanceFood NUMERIC
-@ATTRIBUTE NextRemainingFood NUMERIC
-@ATTRIBUTE NextPacmanDirection {'North', 'South', 'West', 'East'}
-
-
-@data\n''')
+                        f.write(wekaString)
                     if os.stat("log.arff").st_size != 0:
                         f.write("\n")
                 f.write(agent.printLineData(observation, step))
-            # Solicit an action
+            # WEKA}
+
+            # {ACTION
             action = None
             step += 1
             self.mute(agentIndex)
+                # IGNORE THIS
             if self.catchExceptions:
                 try:
                     timed_func = TimeoutFunction(agent.getAction, int(self.rules.getMoveTimeout(agentIndex)) - int(move_time))
@@ -762,11 +773,13 @@ class Game(object):
                     self._agentCrash(agentIndex)
                     self.unmute()
                     return
+                # Gets action from state
             else:
-                action = agent.getAction(observation)
+                action = agent.getAction(observation) # getFeatures(observation)
             self.unmute()
+            # ACTION} 
 
-            # Execute the action
+            # {NEXTSTATE
             self.moveHistory.append( (agentIndex, action) )
             if self.catchExceptions:
                 try:
@@ -778,6 +791,11 @@ class Game(object):
                     return
             else:
                 self.state = self.state.generateSuccessor( agentIndex, action )
+            # NEXTSTATE}
+
+            # update(getFeatures(observation), action, getFeatures(self.state), reward*)
+
+            # {GRAPHIC SHIT
 
             # Change the display
             self.display.update( self.state.data )
@@ -793,6 +811,10 @@ class Game(object):
 
             if _BOINC_ENABLED:
                 boinc.set_fraction_done(self.getProgress())
+
+            # GRAPHIC SHIT}
+
+        ### <END GAME LOOP>
 
         # inform a learning agent of the game result
         f.close()
