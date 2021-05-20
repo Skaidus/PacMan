@@ -72,15 +72,12 @@ class KeyboardInference(inference.InferenceModule):
 class BustersAgent(object):
     "An agent that tracks and displays its beliefs about ghost positions."
 
-    def __init__( self, index = 0, inference = "ExactInference", ghostAgents = None, observeEnable = True, elapseTimeEnable = True):
+    def __init__(self, index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
         inferenceType = util.lookup(inference, globals())
         self.inferenceModules = [inferenceType(a) for a in ghostAgents]
         self.observeEnable = observeEnable
         self.elapseTimeEnable = elapseTimeEnable
-        self.weka = Weka()
-        self.weka.start_jvm()
-        # Para escoger cual clasificador se aplicará
-        self.umbral_confianza = .6
+        self.switch = 1
 
     def registerInitialState(self, gameState):
         "Initializes beliefs and inference modules"
@@ -90,6 +87,14 @@ class BustersAgent(object):
             inference.initialize(gameState)
         self.ghostBeliefs = [inf.getBeliefDistribution() for inf in self.inferenceModules]
         self.firstMove = True
+        if os.path.exists("qtable.txt"):
+        if self.switch == 1:
+            self.table_file = open("qtable.txt", "r+")
+            self.q_table = self.readQtable()
+            self.switch = 0
+        else:
+            self.table_file = open("qtable.txt", "w+")
+
 
     def observationFunction(self, gameState):
         "Removes the ghost states from the gameState"
