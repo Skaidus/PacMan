@@ -87,13 +87,6 @@ class BustersAgent(object):
             inference.initialize(gameState)
         self.ghostBeliefs = [inf.getBeliefDistribution() for inf in self.inferenceModules]
         self.firstMove = True
-        if os.path.exists("qtable.txt"):
-        if self.switch == 1:
-            self.table_file = open("qtable.txt", "r+")
-            self.q_table = self.readQtable()
-            self.switch = 0
-        else:
-            self.table_file = open("qtable.txt", "w+")
 
 
     def observationFunction(self, gameState):
@@ -247,47 +240,31 @@ class QLearningAgent(BustersAgent):
         gamma    - discount factor
         numTraining - number of training episodes, i.e. no learning after these many episodes
     """
-    def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.8, numTraining = 10):
-        "Initialize Q-values"
+    def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.8, numTraining = 10, actionFn = None):
+
+        if actionFn == None:
+            actionFn = lambda state: state.getLegalActions()
+        self.actionFn = actionFn
+        self.episodesSoFar = 0
+        self.accumTrainRewards = 0.0
+        self.accumTestRewards = 0.0
+
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
         self.discount = float(gamma)
         self.numTraining = int(numTraining)
-
         self.index = 0  # This is always Pacman
 
-        self.alpha = float(alpha)
-        self.epsilon = float(epsilon)
-        self.discount = float(gamma)
-        self.numTraining = int(numTraining)
+        self.actions = {"north": 0, "east": 1, "south": 2, "west": 3, "exit": 4}
+        self.table_file = open("qtable.txt", "r+")
+        self.q_table = self.readQtable()
+        self.epsilon = 1
 
         self.legalActions = []
         self.nextLegalActions = []
-        self.actions = {"north":0, "east":1, "south":2, "west":3, "exit":4}
-        self.table_file = open("qtable.txt", "r+")
-        self.q_table = self.readQtable()
-        self.epsilon = 0.05
 
     def update(self, gameState, action, nextGameState):
-        """
-        The parent class calls this to observe a
-        state = action => nextState and reward transition.
-        You should do your Q-Value update here
 
-        Good Terminal state -> reward 1
-        Bad Terminal state -> reward -1
-        Otherwise -> reward 0
-
-        Q-Learning update:
-
-        # Funcion de actualizacion no determinista: (aplpha es la tasa de aprendizaje [0,1]
-        # alpha nos permite modular la agresividad a la hora de actualizar la tabla Q
-        if terminal_state:
-        Q(state,action) <- (1-self.alpha) Q(state,action) + self.alpha * (r + 0)
-        else:
-        Q(state,action) <- (1-self.alpha) Q(state,action) + self.alpha * (r + self.discount * max a' Q(nextState, a'))
-
-        """
         qState = self.getQState(gameState)
         self.legalActions = gameState.getLegalPacmanActions()
         qNextState = self.getQState(nextGameState)
@@ -308,7 +285,7 @@ class QLearningAgent(BustersAgent):
         if qState == (3,2) or qState == (3,1):
             self.q_table[position][action_column] = (1-self.alpha) * self.getQValue(qState,action) + self.alpha * reward;
         else:
-            self.q_table[position][action_column] = (1-self.alpha) * self.getQValue(qState,action) + self.alpha * (reward + self.discount*self.computeValueFromQValues(qNextState) );
+            self.q_table[position][action_column] = (1-self.alpha) * self.getQValue(qState,action) + self.alpha * (reward + self.discount*self.getValue(qNextState) );
         # TRACE for updated q-table. Comment the following lines if you do not want to see that trace
         print("Q-table:")
         self.printQtable()
@@ -375,10 +352,7 @@ class QLearningAgent(BustersAgent):
 
 ### {qState -> qTable[i]
     def computePosition(self, qState):
-        """
-        Compute the row of the qtable for a given state.
-        For instance, the state (3,1) is the row 7
-        """
+
         hash = {'':0, 'east':1, 'west':2, 'north':3, 'south':6}
         atr1 = qState[0]
         return hash[atr1[0]] + hash[atr1[1]] - 1
@@ -387,7 +361,6 @@ class QLearningAgent(BustersAgent):
 
 ##  {RW Qtable
     def readQtable(self):
-        "Read qtable from disc"
         table = self.table_file.readlines()
         q_table = []
 
@@ -399,7 +372,6 @@ class QLearningAgent(BustersAgent):
         return q_table
 
     def writeQtable(self):
-        "Write qtable to disc"
         self.table_file.seek(0)
         self.table_file.truncate()
         for line in self.q_table:
@@ -408,7 +380,6 @@ class QLearningAgent(BustersAgent):
             self.table_file.write("\n")
 
     def printQtable(self):
-        "Print qtable"
         for line in self.q_table:
             print(line)
         print("\n")    
@@ -419,13 +390,7 @@ class QLearningAgent(BustersAgent):
 
     ##{ Pipe game loop and Bellman 
     def getAction(self, gameState):
-        """
-          Compute the action to take in the current state.  With
-          probability self.epsilon, we should take a random action and
-          take the best policy action otherwise.  Note that if there are
-          no legal actions, which is the case at the terminal state, you
-          should choose None as the action.
-        """
+
         self.legalActions = gameState.getLegalPacmanActions()
         qState = self.getQState(gameState)
         # Pick Action
@@ -445,11 +410,6 @@ class QLearningAgent(BustersAgent):
     ## {Q(S,A)
     def getQValue(self, qState, action):
 
-        """
-          Returns Q(state,action)
-          Should return 0.0 if we have never seen a state
-          or the Q node value otherwise
-        """
         position = self.computePosition(qState)
         action_column = self.actions[action]
 
@@ -457,7 +417,7 @@ class QLearningAgent(BustersAgent):
     ## Q(S,A)}
 
     ## {max Q(S,A)
-    def computeValueFromQValues(self, qNextState):
+    def getValue(self, qNextState):
         """
           Returns max_action Q(state,action)
           where the max is over legal actions.  Note that if
@@ -470,13 +430,8 @@ class QLearningAgent(BustersAgent):
     ## max Q(S,A)}
 
     ## {argmax Q(S,A)
-    def computeActionFromQValues(self, qState):
-        """
-          Compute the best action to take in a state.  Note that if there
-          are no legal actions, which is the case at the terminal state,
-          you should return None.
-        """
-      #  legalActions = self.getLegalActions(state) # get legal actions.
+
+    def getPolicy(self, qState):
         if len(self.legalActions)==0:
           return None
 
@@ -491,10 +446,6 @@ class QLearningAgent(BustersAgent):
                 best_value = value
 
         return random.choice(best_actions)
-
-    def getPolicy(self, qState):
-        "Return the best action in the qtable for a given state"
-        return self.computeActionFromQValues(qState)
 
     ## argmax Q(S,A)}
 
