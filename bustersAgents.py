@@ -1,5 +1,5 @@
 from __future__ import print_function
-from wekaI import Weka
+
 import random, util
 from sys import maxsize
 
@@ -240,11 +240,9 @@ class QLearningAgent(BustersAgent):
         gamma    - discount factor
         numTraining - number of training episodes, i.e. no learning after these many episodes
     """
-    def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.8, numTraining = 10, actionFn = None):
+    def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
-        if actionFn == None:
-            actionFn = lambda state: state.getLegalActions()
-        self.actionFn = actionFn
+        BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
         self.accumTrainRewards = 0.0
         self.accumTestRewards = 0.0
@@ -256,7 +254,13 @@ class QLearningAgent(BustersAgent):
         self.index = 0  # This is always Pacman
 
         self.actions = {"north": 0, "east": 1, "south": 2, "west": 3, "exit": 4}
-        self.table_file = open("qtable.txt", "r+")
+        if os.path.exists("qtable.txt"):
+            if self.switch == 1:
+                self.table_file = open("qtable.txt", "r+")
+                self.q_table = self.readQtable()
+                self.switch = 0
+        else:
+            self.table_file = open("qtable.txt", "w+")
         self.q_table = self.readQtable()
         self.epsilon = 1
 
@@ -360,6 +364,18 @@ class QLearningAgent(BustersAgent):
 ### qState -> qTable[i]}
 
 ##  {RW Qtable
+
+    def registerInitialState(self, state):
+        if self.episodesSoFar == 0:
+            print('Beginning %d episodes of Training' % (self.numTraining))
+        if os.path.exists("qtable.txt"):
+            if self.switch == 1:
+                self.table_file = open("qtable.txt", "r+")
+                self.q_table = self.readQtable()
+                self.switch = 0
+        else:
+            self.table_file = open("qtable.txt", "w+")
+
     def readQtable(self):
         table = self.table_file.readlines()
         q_table = []
@@ -454,9 +470,12 @@ class QLearningAgent(BustersAgent):
 ## {Misc.
     def __del__(self):
         "Destructor. Invokation at the end of each episode"
-        self.writeQtable()
-        self.table_file.close()
+        if os.path.exists("qtable.txt"):
+            self.writeQtable()
+            self.table_file.close()
 ## Misc.}
+
+
 
 ################################################################
 #                         FIN PRÁCTICA 2                       #
