@@ -253,7 +253,7 @@ class QLearningAgent(BustersAgent):
         self.numTraining = int(numTraining)
         self.index = 0  # This is always Pacman
 
-        self.actions = {"north": 0, "east": 1, "south": 2, "west": 3, "exit": 4}
+        self.actions = {"North": 0, "East": 1, "South": 2, "West": 3, "Stop": 4}
         if os.path.exists("qtable.txt"):
             if self.switch == 1:
                 self.table_file = open("qtable.txt", "r+")
@@ -474,6 +474,9 @@ class QLearningAgent(BustersAgent):
             self.writeQtable()
             self.table_file.close()
 ## Misc.}
+
+    def final(self, state):
+        self.writeQtable()
 
 
 

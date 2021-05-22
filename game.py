@@ -792,8 +792,8 @@ class Game(object):
             else:
                 self.state = self.state.generateSuccessor( agentIndex, action )
             # NEXTSTATE}
-
-            # update(getFeatures(observation), action, getFeatures(self.state), reward*)
+            if 'update' in dir(agent):
+                agent.update(observation, action, self.state)
 
             # {GRAPHIC SHIT
 
