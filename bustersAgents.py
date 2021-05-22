@@ -254,15 +254,9 @@ class QLearningAgent(BustersAgent):
         self.index = 0  # This is always Pacman
 
         self.actions = {"North": 0, "East": 1, "South": 2, "West": 3, "Stop": 4}
-        if os.path.exists("qtable.txt"):
-            if self.switch == 1:
-                self.table_file = open("qtable.txt", "r+")
-                self.q_table = self.readQtable()
-                self.switch = 0
-        else:
-            self.table_file = open("qtable.txt", "w+")
+        self.table_file = open("qtable.txt", "r+")
         self.q_table = self.readQtable()
-        self.epsilon = 1
+        self.epsilon = 0.05
 
         self.legalActions = []
         self.nextLegalActions = []
