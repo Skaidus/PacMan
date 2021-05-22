@@ -286,7 +286,7 @@ class QLearningAgent(BustersAgent):
         
         "*** YOUR CODE HERE ***"
 
-        if qState == (3,2) or qState == (3,1):
+        if len(gameState.getLivingGhosts()) == 0:
             self.q_table[position][action_column] = (1-self.alpha) * self.getQValue(qState,action) + self.alpha * reward;
         else:
             self.q_table[position][action_column] = (1-self.alpha) * self.getQValue(qState,action) + self.alpha * (reward + self.discount*self.getValue(qNextState) );
