@@ -240,7 +240,7 @@ class QLearningAgent(BustersAgent):
         gamma    - discount factor
         numTraining - number of training episodes, i.e. no learning after these many episodes
     """
-    def __init__(self, alpha=1, epsilon=0, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+    def __init__(self, alpha=0.8, epsilon=0, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
         BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
@@ -370,6 +370,8 @@ class QLearningAgent(BustersAgent):
             reward -= 1
         elif atr1[1] != "" and atr1[1] != self.lastAction:
             reward -= 1
+        else:
+            reward +=1
                     
         return reward
 

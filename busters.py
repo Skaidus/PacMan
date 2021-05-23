@@ -409,7 +409,8 @@ class GhostRules(object):
 
     def applyAction( state, action, ghostIndex):
         legal = GhostRules.getLegalActions( state, ghostIndex )
-        if action not in legal:
+        # MODIFIED !!!
+        if action not in legal and action is not Directions.STOP:
             raise Exception("Illegal ghost action: " + str(action))
 
         ghostState = state.data.agentStates[ghostIndex]
