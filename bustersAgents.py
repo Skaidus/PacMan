@@ -304,13 +304,16 @@ class QLearningAgent(BustersAgent):
         latr2 = self.lastQState[1]
         atr2 = self.currentQState[1]
 
-        if latr2 and not atr2:
-            reward -= 5
-        elif latr2 and atr2:
-            reward +=5
+        if latr2:
+            if atr2:
+                reward+=5
+            else:
+                reward-=5
+            #if Directions.REVERSE(self.currentQState.data.agentStates[0].getDirection()) == self.lastAction:
+            #    reward-=10
         return reward
     # alpha = 0.2 epsilon = 0.05
-    def __init__(self, alpha=0.1, epsilon=0.4, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+    def __init__(self, alpha=0.8, epsilon=0.8, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
         BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
