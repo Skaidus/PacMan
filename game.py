@@ -678,9 +678,6 @@ class Game(object):
 
         agentIndex = self.startingIndex
         numAgents = len( self.agents )
-        step = 0
-        # Open the log to write the state
-        f = open("log.arff", "a")
 
         ### <GAME LOOP>
         while not self.gameOver:
@@ -716,21 +713,8 @@ class Game(object):
                 observation = self.state.deepCopy()
             # STATE }
 
-            # {WEKA
-            if 'printLineData' in dir( agent ):
-                
-                # If we just started, new play
-                if step == 0:
-                    if os.stat("log.arff").st_size ==0:
-                        f.write(wekaString)
-                    if os.stat("log.arff").st_size != 0:
-                        f.write("\n")
-                f.write(agent.printLineData(observation, step))
-            # WEKA}
-
             # {ACTION
             action = None
-            step += 1
             self.mute(agentIndex)
                 # IGNORE THIS
             if self.catchExceptions:
@@ -792,8 +776,6 @@ class Game(object):
             else:
                 self.state = self.state.generateSuccessor( agentIndex, action )
             # NEXTSTATE}
-            if 'update' in dir(agent):
-                agent.update(observation, action, self.state)
 
             # {GRAPHIC SHIT
 
@@ -817,7 +799,6 @@ class Game(object):
         ### <END GAME LOOP>
 
         # inform a learning agent of the game result
-        f.close()
         for agentIndex, agent in enumerate(self.agents):
             if "final" in dir( agent ) :
                 try:

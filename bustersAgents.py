@@ -240,12 +240,20 @@ class QLearningAgent(BustersAgent):
         gamma    - discount factor
         numTraining - number of training episodes, i.e. no learning after these many episodes
     """
-    def __init__(self, alpha=1.0, epsilon=0.05, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+    def __init__(self, alpha=1, epsilon=0, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
         BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
         self.accumTrainRewards = 0.0
         self.accumTestRewards = 0.0
+
+        self.lastState = None
+        self.lastQState = None
+
+        self.lastAction = None
+
+        self.currentState = None
+        self.currentQState = None
 
         self.alpha = float(alpha)
         self.epsilon = float(epsilon)
@@ -256,57 +264,36 @@ class QLearningAgent(BustersAgent):
         self.actions = {"North": 0, "East": 1, "South": 2, "West": 3, "Stop": 4}
         self.table_file = open("qtable.txt", "r+")
         self.q_table = self.readQtable()
-        self.epsilon = 0.05
 
-        self.legalActions = []
-        self.nextLegalActions = []
-
-    def update(self, gameState, action, nextGameState):
-
-        qState = self.getQState(gameState)
-        self.legalActions = gameState.getLegalPacmanActions()
-        qNextState = self.getQState(nextGameState)
-        self.nextLegalActions = nextGameState.getLegalPacmanActions()
-
-        # TRACE for transition and position to update. Comment the following lines if you do not want to see that trace
-        reward = self.rewardFunction(qState, action, qNextState)
-        print("Update Q-table with transition: ", qState, action, qNextState, reward)
-        position = self.computePosition(qState)
-        action_column = self.actions[action]
-    
-        print("Corresponding Q-table cell to update:", position, action_column)
-        position = self.computePosition(qState)
-        
-        
-        "*** YOUR CODE HERE ***"
-
-        if len(gameState.getLivingGhosts()) == 0:
-            self.q_table[position][action_column] = (1-self.alpha) * self.getQValue(qState,action) + self.alpha * reward;
+    def registerInitialState(self, state):
+        if self.episodesSoFar == 0:
+            print('Beginning %d episodes of Training' % (self.numTraining))
+        if os.path.exists("qtable.txt"):
+            if self.switch == 1:
+                self.table_file = open("qtable.txt", "r+")
+                self.q_table = self.readQtable()
+                self.switch = 0
         else:
-            self.q_table[position][action_column] = (1-self.alpha) * self.getQValue(qState,action) + self.alpha * (reward + self.discount*self.getValue(qNextState) );
-        # TRACE for updated q-table. Comment the following lines if you do not want to see that trace
-        print("Q-table:")
-        self.printQtable()
+            self.table_file = open("qtable.txt", "w+")
 
-    def rewardFunction(self, state, action, nextState):
+    def observationFunction(self, gameState):
         """
-        --> state: (arriba..., )
-        -> + reward si se acerca
-        -> ++ reward si se come un fantasma (<vivos)
-        -> ++ reward si se come algo 
+            This is where we ended up after our last action.
+            The simulation should somehow ensure this is called
         """
+        self.currentState = gameState
+        self.updateQStates()
+        if not self.lastState is None:
+            reward = self.currentState.getScore() - self.lastState.getScore()
+            self.update(reward)
+        return gameState
 
-        # state[0] == atributo 1 (dir ghost mas cercano)
-        reward = 0
-        atr1 = state[0]
-        if atr1[0] != "" and atr1[0] != action:
-            reward -= 1
-        elif atr1[1] != "" and atr1[1] != action:
-            reward -= 1
-                    
-        return reward
+    def updateQStates(self):
+        if self.lastState is not None:
+            self.lastQState = self.getQState(self.lastState)
+        if self.currentState is not None:
+            self.currentQState = self.getQState(self.currentState)
 
-### {gameState -> qState
     def getQState(self, gameState):
         """
         Generates a Q table state from the gamestate
@@ -319,9 +306,10 @@ class QLearningAgent(BustersAgent):
         i = 0
         nearestLivingGhost = -1
         while i < len(gameState.getLivingGhosts()) - 1:
-            if gameState.getLivingGhosts()[i+1] == True:
+            if gameState.getLivingGhosts()[i + 1] == True:
                 currentGhostDistance = gameState.data.ghostDistances[i]
-                if(nearestLivingGhost == -1 or currentGhostDistance < gameState.data.ghostDistances[nearestLivingGhost]) :
+                if (nearestLivingGhost == -1 or currentGhostDistance < gameState.data.ghostDistances[
+                    nearestLivingGhost]):
                     nearestLivingGhost = i
             i += 1
         nearestGhostPositions = gameState.getGhostPositions()[nearestLivingGhost]
@@ -329,46 +317,81 @@ class QLearningAgent(BustersAgent):
 
         x_axis = ''
         if nearestGhostPositions[0] > actualPosition[0]:
-            x_axis ='east'
+            x_axis = 'east'
         elif nearestGhostPositions[0] < actualPosition[0]:
-            x_axis ='west'
+            x_axis = 'west'
 
         y_axis = ''
         if nearestGhostPositions[1] > actualPosition[1]:
-            y_axis ='north'
+            y_axis = 'north'
         elif nearestGhostPositions[1] < actualPosition[1]:
-            y_axis ='south'
-        
-        
+            y_axis = 'south'
+
         qState.append((x_axis, y_axis))
+        # Atributo 2
+
         # Atributo 2
 
         # Devuelve el estado
         return qState
 
-### gameState -> qState}
+    def update(self, scoreDiff):
 
-### {qState -> qTable[i]
+        # TRACE for transition and position to update. Comment the following lines if you do not want to see that trace
+        reward = scoreDiff + self.rewardFunction()
+        print("Update Q-table with transition: ", self.lastQState, self.lastAction, self.currentQState, reward)
+        position = self.computePosition(self.lastQState)
+        action_column = self.actions[self.lastAction]
+        print("Corresponding Q-table cell to update:", position, action_column)
+        
+        
+        "*** YOUR CODE HERE ***"
+
+        if len(self.lastState.getLivingGhosts()) == 0:
+            self.q_table[position][action_column] = (1-self.alpha) * self.getQValue(self.lastQState,self.lastAction) + self.alpha * reward;
+        else:
+            self.q_table[position][action_column] = (1-self.alpha) * self.getQValue(self.lastQState,self.lastAction) + self.alpha * (reward + self.discount*self.getValue() );
+        # TRACE for updated q-table. Comment the following lines if you do not want to see that trace
+        print("Q-table:")
+        self.printQtable()
+
+    def rewardFunction(self):
+        """
+        --> state: (arriba..., )
+        -> + reward si se acerca
+        -> ++ reward si se come un fantasma (<vivos)
+        -> ++ reward si se come algo 
+        """
+
+        # state[0] == atributo 1 (dir ghost mas cercano)
+        reward = 0
+        atr1 = self.lastQState[0]
+        if atr1[0] != "" and atr1[0] != self.lastAction:
+            reward -= 1
+        elif atr1[1] != "" and atr1[1] != self.lastAction:
+            reward -= 1
+                    
+        return reward
+
     def computePosition(self, qState):
 
         hash = {'':0, 'east':1, 'west':2, 'north':3, 'south':6}
         atr1 = qState[0]
         return hash[atr1[0]] + hash[atr1[1]] - 1
         # return state[0]+state[1]*
-### qState -> qTable[i]}
 
-##  {RW Qtable
+    def getQValue(self, qState, action):
 
-    def registerInitialState(self, state):
-        if self.episodesSoFar == 0:
-            print('Beginning %d episodes of Training' % (self.numTraining))
-        if os.path.exists("qtable.txt"):
-            if self.switch == 1:
-                self.table_file = open("qtable.txt", "r+")
-                self.q_table = self.readQtable()
-                self.switch = 0
-        else:
-            self.table_file = open("qtable.txt", "w+")
+        position = self.computePosition(qState)
+        action_column = self.actions[action]
+
+        return self.q_table[position][action_column]
+
+    def getValue(self):
+
+        if len(self.currentState.getLegalPacmanActions())==0:
+          return 0
+        return max(self.q_table[self.computePosition(self.currentQState)])
 
     def readQtable(self):
         table = self.table_file.readlines()
@@ -401,53 +424,29 @@ class QLearningAgent(BustersAgent):
     ##{ Pipe game loop and Bellman 
     def getAction(self, gameState):
 
-        self.legalActions = gameState.getLegalPacmanActions()
+        legalActions = gameState.getLegalPacmanActions()
         qState = self.getQState(gameState)
         # Pick Action
         action = None
 
-        if len(self.legalActions) == 0:
-             return action
+        if len(legalActions) != 0:
+            flip = util.flipCoin(self.epsilon)
+            if flip:
+                action = random.choice(legalActions)
+            else:
+                action = self.getPolicy(qState, legalActions)
 
-        flip = util.flipCoin(self.epsilon)
+        self.lastState = gameState
+        self.lastAction = action
+        return action
 
-        if flip:
-            return random.choice(self.legalActions)
-        return self.getPolicy(qState)
-
-    ## Pipe game loop and Bellman}
-
-    ## {Q(S,A)
-    def getQValue(self, qState, action):
-
-        position = self.computePosition(qState)
-        action_column = self.actions[action]
-
-        return self.q_table[position][action_column]
-    ## Q(S,A)}
-
-    ## {max Q(S,A)
-    def getValue(self, qNextState):
-        """
-          Returns max_action Q(state,action)
-          where the max is over legal actions.  Note that if
-          there are no legal actions, which is the case at the
-          terminal state, you should return a value of 0.0.
-        """
-        if len(self.nextLegalActions)==0:
-          return 0
-        return max(self.q_table[self.computePosition(qNextState)])
-    ## max Q(S,A)}
-
-    ## {argmax Q(S,A)
-
-    def getPolicy(self, qState):
-        if len(self.legalActions)==0:
+    def getPolicy(self, qState, legalActions):
+        if len(legalActions)==0:
           return None
 
-        best_actions = [self.legalActions[0]]
-        best_value = self.getQValue(qState, self.legalActions[0])
-        for action in self.legalActions:
+        best_actions = [legalActions[0]]
+        best_value = self.getQValue(qState, legalActions[0])
+        for action in legalActions:
             value = self.getQValue(qState, action)
             if value == best_value:
                 best_actions.append(action)
@@ -457,20 +456,15 @@ class QLearningAgent(BustersAgent):
 
         return random.choice(best_actions)
 
-    ## argmax Q(S,A)}
-
-## Bellman stuff}
-
-## {Misc.
     def __del__(self):
         "Destructor. Invokation at the end of each episode"
         if os.path.exists("qtable.txt"):
             self.writeQtable()
             self.table_file.close()
-## Misc.}
 
     def final(self, state):
         self.writeQtable()
+
 
 
 
@@ -532,6 +526,7 @@ class RandomPAgent(BustersAgent):
         if   ( move_random == 2 ) and Directions.NORTH in legal:   move = Directions.NORTH
         if   ( move_random == 3 ) and Directions.SOUTH in legal: move = Directions.SOUTH
         return move
+
         
 class GreedyBustersAgent(BustersAgent):
     "An agent that charges the closest ghost."
