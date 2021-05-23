@@ -244,7 +244,7 @@ class QLearningAgent(BustersAgent):
 
         hash = {'':0, 'East':1, 'West':2, 'North':3, 'South':6}
         atr1 = qState[0]
-        return hash[atr1[0]] + hash[atr1[1]] - 1 + 8 * int(qState[1])
+        return hash[atr1[0]] + hash[atr1[1]] - 1 + 8 * int(qState[1]) + 16 * int(qState[2])
         # return state[0]+state[1]*
 
     def getQState(self, gameState):
@@ -288,6 +288,12 @@ class QLearningAgent(BustersAgent):
             touchWall = True
         qState.append(touchWall)
 
+        # Atributo 3
+        foodClose = False
+        if gameState.getDistanceNearestFood() == 1:
+            foodClose = True
+        qState.append(foodClose)
+
         # Devuelve el estado
         return qState
 
@@ -308,9 +314,18 @@ class QLearningAgent(BustersAgent):
             reward -= 5
         elif latr2 and atr2:
             reward +=5
+
+        latr3 = self.lastQState[2]
+        atr3 = self.currentQState[2]
+
+        if latr3 and not atr3:
+            reward -= 5
+        elif latr3 and atr3:
+            reward += 5
+
         return reward
     # alpha = 0.2 epsilon = 0.05
-    def __init__(self, alpha=0.1, epsilon=0.4, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+    def __init__(self, alpha=0.5, epsilon=0.5, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
         BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
