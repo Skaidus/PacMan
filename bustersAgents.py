@@ -240,72 +240,12 @@ class QLearningAgent(BustersAgent):
         gamma    - discount factor
         numTraining - number of training episodes, i.e. no learning after these many episodes
     """
+    def computePosition(self, qState):
 
-    def rewardFunction(self):
-        reward = 0
-        atr1 = self.lastQState[0]
-        if atr1[0] != '' and atr1[0] != self.lastAction and self.lastAction != 'North' and self.lastAction != 'South':
-            reward -= 1
-        elif atr1[1] != '' and atr1[1] != self.lastAction and self.lastAction != 'West' and self.lastAction != 'East':
-            reward -= 1
-        else:
-            reward += 5
-
-        return reward
-    # alpha = 0.2 epsilon = 0.05
-    def __init__(self, alpha=0.2, epsilon=0.05, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
-
-        BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
-        self.episodesSoFar = 0
-        self.accumTrainRewards = 0.0
-        self.accumTestRewards = 0.0
-
-        self.lastState = None
-        self.lastQState = None
-
-        self.lastAction = None
-
-        self.currentState = None
-        self.currentQState = None
-
-        self.alpha = float(alpha)
-        self.epsilon = float(epsilon)
-        self.discount = float(gamma)
-        self.numTraining = int(numTraining)
-        self.index = 0  # This is always Pacman
-
-        self.actions = {"North": 0, "East": 1, "South": 2, "West": 3, "Stop": 4}
-        self.table_file = open("qtable.txt", "r+")
-        self.q_table = self.readQtable()
-
-    def registerInitialState(self, state):
-        if self.episodesSoFar == 0:
-            print('Beginning %d episodes of Training' % (self.numTraining))
-        if os.path.exists("qtable.txt"):
-            if self.switch == 1:
-                self.table_file = open("qtable.txt", "r+")
-                self.q_table = self.readQtable()
-                self.switch = 0
-        else:
-            self.table_file = open("qtable.txt", "w+")
-
-    def observationFunction(self, gameState):
-        """
-            This is where we ended up after our last action.
-            The simulation should somehow ensure this is called
-        """
-        self.currentState = gameState
-        self.updateQStates()
-        if not self.lastState is None:
-            reward = self.currentState.getScore() - self.lastState.getScore()
-            self.update(reward)
-        return gameState
-
-    def updateQStates(self):
-        if self.lastState is not None:
-            self.lastQState = self.getQState(self.lastState)
-        if self.currentState is not None:
-            self.currentQState = self.getQState(self.currentState)
+        hash = {'':0, 'East':1, 'West':2, 'North':3, 'South':6}
+        atr1 = qState[0]
+        return hash[atr1[0]] + hash[atr1[1]] - 1 + 8 * int(qState[1])
+        # return state[0]+state[1]*
 
     def getQState(self, gameState):
         """
@@ -342,11 +282,89 @@ class QLearningAgent(BustersAgent):
 
         qState.append((x_axis, y_axis))
         # Atributo 2
-
-        # Atributo 2
+        touchWall = False
+        legals = gameState.getLegalPacmanActions()
+        if x_axis not in legals or y_axis not in legals:
+            touchWall = True
+        qState.append(touchWall)
 
         # Devuelve el estado
         return qState
+
+    def rewardFunction(self):
+        reward = 0
+        atr1 = self.lastQState[0]
+        if atr1[0] != '' and atr1[0] != self.lastAction and self.lastAction != 'North' and self.lastAction != 'South':
+            reward -= 1
+        elif atr1[1] != '' and atr1[1] != self.lastAction and self.lastAction != 'West' and self.lastAction != 'East':
+            reward -= 1
+        else:
+            reward += 5
+
+        latr2 = self.lastQState[1]
+        atr2 = self.currentQState[1]
+
+        if latr2 and not atr2:
+            reward -= 5
+        elif latr2 and atr2:
+            reward +=5
+        return reward
+    # alpha = 0.2 epsilon = 0.05
+    def __init__(self, alpha=0.1, epsilon=0.4, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+
+        BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
+        self.episodesSoFar = 0
+        self.accumTrainRewards = 0.0
+        self.accumTestRewards = 0.0
+
+        self.lastState = None
+        self.lastQState = None
+
+        self.lastAction = None
+
+        self.currentState = None
+        self.currentQState = None
+
+        self.alpha = float(alpha)
+        self.epsilon = float(epsilon)
+        self.discount = float(gamma)
+        self.numTraining = int(numTraining)
+        self.index = 0  # This is always Pacman
+
+        self.actions = {"North": 0, "East": 1, "South": 2, "West": 3}
+        self.table_file = open("qtable.txt", "r+")
+        self.q_table = self.readQtable()
+
+    def registerInitialState(self, state):
+        if self.episodesSoFar == 0:
+            print('Beginning %d episodes of Training' % (self.numTraining))
+        if os.path.exists("qtable.txt"):
+            if self.switch == 1:
+                self.table_file = open("qtable.txt", "r+")
+                self.q_table = self.readQtable()
+                self.switch = 0
+        else:
+            self.table_file = open("qtable.txt", "w+")
+
+    def observationFunction(self, gameState):
+        """
+            This is where we ended up after our last action.
+            The simulation should somehow ensure this is called
+        """
+        self.currentState = gameState
+        self.updateQStates()
+        if not self.lastState is None:
+            reward = self.currentState.getScore() - self.lastState.getScore()
+            self.update(reward)
+        return gameState
+
+    def updateQStates(self):
+        if self.lastState is not None:
+            self.lastQState = self.getQState(self.lastState)
+        if self.currentState is not None:
+            self.currentQState = self.getQState(self.currentState)
+
+
 
     def update(self, scoreDiff):
 
@@ -373,12 +391,7 @@ class QLearningAgent(BustersAgent):
 
 
 
-    def computePosition(self, qState):
 
-        hash = {'':0, 'East':1, 'West':2, 'North':3, 'South':6}
-        atr1 = qState[0]
-        return hash[atr1[0]] + hash[atr1[1]] - 1
-        # return state[0]+state[1]*
 
     def getQValue(self, qState, action):
 
@@ -425,6 +438,8 @@ class QLearningAgent(BustersAgent):
     def getAction(self, gameState):
 
         legalActions = gameState.getLegalPacmanActions()
+        legalActions.remove('Stop')
+
         qState = self.getQState(gameState)
         # Pick Action
         action = None
