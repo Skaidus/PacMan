@@ -240,7 +240,20 @@ class QLearningAgent(BustersAgent):
         gamma    - discount factor
         numTraining - number of training episodes, i.e. no learning after these many episodes
     """
-    def __init__(self, alpha=0.8, epsilon=0, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+
+    def rewardFunction(self):
+        reward = 0
+        atr1 = self.lastQState[0]
+        if atr1[0] != '' and atr1[0] != self.lastAction and self.lastAction != 'North' and self.lastAction != 'South':
+            reward -= 1
+        elif atr1[1] != '' and atr1[1] != self.lastAction and self.lastAction != 'West' and self.lastAction != 'East':
+            reward -= 1
+        else:
+            reward += 5
+
+        return reward
+    # alpha = 0.2 epsilon = 0.05
+    def __init__(self, alpha=0.2, epsilon=0.05, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
         BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
@@ -317,15 +330,15 @@ class QLearningAgent(BustersAgent):
 
         x_axis = ''
         if nearestGhostPositions[0] > actualPosition[0]:
-            x_axis = 'east'
+            x_axis = 'East'
         elif nearestGhostPositions[0] < actualPosition[0]:
-            x_axis = 'west'
+            x_axis = 'West'
 
         y_axis = ''
         if nearestGhostPositions[1] > actualPosition[1]:
-            y_axis = 'north'
+            y_axis = 'North'
         elif nearestGhostPositions[1] < actualPosition[1]:
-            y_axis = 'south'
+            y_axis = 'South'
 
         qState.append((x_axis, y_axis))
         # Atributo 2
@@ -338,7 +351,10 @@ class QLearningAgent(BustersAgent):
     def update(self, scoreDiff):
 
         # TRACE for transition and position to update. Comment the following lines if you do not want to see that trace
-        reward = scoreDiff + self.rewardFunction()
+        print("Diferencia puntuacion: "+str(scoreDiff))
+        custom = self.rewardFunction()
+        print("Custom reward: "+str(custom))
+        reward = scoreDiff + custom
         print("Update Q-table with transition: ", self.lastQState, self.lastAction, self.currentQState, reward)
         position = self.computePosition(self.lastQState)
         action_column = self.actions[self.lastAction]
@@ -355,29 +371,11 @@ class QLearningAgent(BustersAgent):
         print("Q-table:")
         self.printQtable()
 
-    def rewardFunction(self):
-        """
-        --> state: (arriba..., )
-        -> + reward si se acerca
-        -> ++ reward si se come un fantasma (<vivos)
-        -> ++ reward si se come algo 
-        """
 
-        # state[0] == atributo 1 (dir ghost mas cercano)
-        reward = 0
-        atr1 = self.lastQState[0]
-        if atr1[0] != "" and atr1[0] != self.lastAction:
-            reward -= 1
-        elif atr1[1] != "" and atr1[1] != self.lastAction:
-            reward -= 1
-        else:
-            reward +=1
-                    
-        return reward
 
     def computePosition(self, qState):
 
-        hash = {'':0, 'east':1, 'west':2, 'north':3, 'south':6}
+        hash = {'':0, 'East':1, 'West':2, 'North':3, 'South':6}
         atr1 = qState[0]
         return hash[atr1[0]] + hash[atr1[1]] - 1
         # return state[0]+state[1]*
