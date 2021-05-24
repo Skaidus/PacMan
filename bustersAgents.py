@@ -244,7 +244,7 @@ class QLearningAgent(BustersAgent):
 
         hash = {'':0, 'East':1, 'West':2, 'North':3, 'South':6}
         atr1 = qState[0]
-        return hash[atr1[0]] + hash[atr1[1]] - 1 + 8 * int(qState[1]) + 16 * int(qState[2])
+        return hash[atr1[0]] + hash[atr1[1]] - 1 + 8 * int(qState[1])
         # return state[0]+state[1]*
 
     def getQState(self, gameState):
@@ -265,19 +265,44 @@ class QLearningAgent(BustersAgent):
                     nearestLivingGhost]):
                     nearestLivingGhost = i
             i += 1
+
+        # Get nearest food
         nearestGhostPositions = gameState.getGhostPositions()[nearestLivingGhost]
+        nearestObj = nearestGhostPositions
+
+        row_i = 0
+        col_i = 0
+        if (gameState.getNumFood() > 0):
+            minDistance = 900000
+            pacmanPosition = gameState.getPacmanPosition()
+            for i in range(gameState.data.layout.width):
+                for j in range(gameState.data.layout.height):
+                    if gameState.hasFood(i, j):
+                        foodPosition = i, j
+                        distance = util.manhattanDistance(pacmanPosition, foodPosition)
+                        if distance < minDistance:
+                            minDistance = distance
+                            row_i = i
+                            col_i = i
+
+            nearestGhostDistance = gameState.data.ghostDistances[nearestLivingGhost]
+            if nearestGhostDistance < minDistance:
+                nearestObj = nearestGhostPositions
+            else:
+                nearestObj = [row_i, col_i]
+
         actualPosition = gameState.getPacmanPosition()
 
         x_axis = ''
-        if nearestGhostPositions[0] > actualPosition[0]:
+        if nearestObj[0] > actualPosition[0]:
             x_axis = 'East'
-        elif nearestGhostPositions[0] < actualPosition[0]:
+        elif nearestObj[0] < actualPosition[0]:
             x_axis = 'West'
 
         y_axis = ''
-        if nearestGhostPositions[1] > actualPosition[1]:
+        if nearestObj[1] > actualPosition[1]:
             y_axis = 'North'
-        elif nearestGhostPositions[1] < actualPosition[1]:
+        elif nearestObj[1] < actualPosition[1]:
             y_axis = 'South'
 
         qState.append((x_axis, y_axis))
@@ -287,12 +312,6 @@ class QLearningAgent(BustersAgent):
         if ((x_axis not in legals) and x_axis != '') or ((y_axis not in legals) and y_axis != ''):
             touchWall = True
         qState.append(touchWall)
-
-        # Atributo 3
-        foodClose = False
-        if gameState.getDistanceNearestFood() == 1:
-            foodClose = True
-        qState.append(foodClose)
 
         # Devuelve el estado
         return qState
@@ -314,14 +333,6 @@ class QLearningAgent(BustersAgent):
             reward -= 5
         elif latr2 and atr2:
             reward +=5
-
-        latr3 = self.lastQState[2]
-        atr3 = self.currentQState[2]
-
-        if latr3 and not atr3:
-            reward -= 5
-        elif latr3 and atr3:
-            reward += 5
 
         return reward
     # alpha = 0.2 epsilon = 0.05
