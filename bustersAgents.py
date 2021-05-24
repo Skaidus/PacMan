@@ -318,7 +318,7 @@ class QLearningAgent(BustersAgent):
                 print('Se separó del muro! Mal!')
                 reward-=10
             latr3 = self.lastQState[2]
-            atr3 = self.lastQState[2]
+            atr3 = self.currentQState[2]
             if Directions.REVERSE[latr3] == atr3:
                 print('No vuelvas para atrás!')
                 reward -= 10
