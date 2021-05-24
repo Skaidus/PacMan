@@ -282,15 +282,16 @@ class QLearningAgent(BustersAgent):
                         distance = util.manhattanDistance(pacmanPosition, foodPosition)
                         if distance < minDistance:
                             minDistance = distance
-                            row_i = i
+                            row_i = j
                             col_i = i
 
             nearestGhostDistance = gameState.data.ghostDistances[nearestLivingGhost]
             if nearestGhostDistance < minDistance:
                 nearestObj = nearestGhostPositions
             else:
-                nearestObj = [row_i, col_i]
 
+                nearestObj = [col_i, row_i]
+        print(nearestObj)
         actualPosition = gameState.getPacmanPosition()
 
         x_axis = ''
@@ -338,7 +339,7 @@ class QLearningAgent(BustersAgent):
         return reward
 
     # alpha = 0.2 epsilon = 0.05
-    def __init__(self, alpha=0.1, epsilon=0.4, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+    def __init__(self, alpha=0, epsilon=0, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
         BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
