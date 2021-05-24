@@ -284,7 +284,7 @@ class QLearningAgent(BustersAgent):
         # Atributo 2
         touchWall = False
         legals = gameState.getLegalPacmanActions()
-        if x_axis not in legals or y_axis not in legals:
+        if ((x_axis not in legals) and x_axis != '') or ((y_axis not in legals) and y_axis != ''):
             touchWall = True
         qState.append(touchWall)
 
@@ -325,7 +325,7 @@ class QLearningAgent(BustersAgent):
 
         return reward
     # alpha = 0.2 epsilon = 0.05
-    def __init__(self, alpha=0.5, epsilon=0.5, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+    def __init__(self, alpha=0.2, epsilon=0.05, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
         BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
