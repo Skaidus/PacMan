@@ -243,8 +243,9 @@ class QLearningAgent(BustersAgent):
     def computePosition(self, qState):
 
         hash = {'':0, 'East':1, 'West':2, 'North':3, 'South':6}
+        hash2 = {'East': 0, 'West': 1, 'North': 2, 'South': 3}
         atr1 = qState[0]
-        return hash[atr1[0]] + hash[atr1[1]] - 1 + 8 * int(qState[1])
+        return hash[atr1[0]] + hash[atr1[1]] - 1 + 8 * int(qState[1]) + 16 * hash2[qState[2]]
         # return state[0]+state[1]*
 
     def getQState(self, gameState):
@@ -313,6 +314,11 @@ class QLearningAgent(BustersAgent):
             touchWall = True
         qState.append(touchWall)
 
+        # Atributo 3
+        facing = gameState.data.agentStates[0].getDirection()
+        if facing == 'Stop':
+            facing = 'East'
+        qState.append(facing)
         # Devuelve el estado
         return qState
 
@@ -329,14 +335,22 @@ class QLearningAgent(BustersAgent):
         latr2 = self.lastQState[1]
         atr2 = self.currentQState[1]
 
-        if latr2 and not atr2:
-            reward -= 5
-        elif latr2 and atr2:
-            reward +=5
-
+        if latr2:
+            if atr2:
+                print('Sigue tocando!')
+                reward+=10
+            else:
+                print('Se separó del muro! Mal!')
+                reward-=10
+            latr3 = self.lastQState[2]
+            atr3 = self.currentQState[2]
+            if Directions.REVERSE[latr3] == atr3:
+                print('No vuelvas para atrás!')
+                reward -= 10
         return reward
+
     # alpha = 0.2 epsilon = 0.05
-    def __init__(self, alpha=0.2, epsilon=0.05, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+    def __init__(self, alpha=0.1, epsilon=0.4, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
         BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
