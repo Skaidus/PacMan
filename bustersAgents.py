@@ -229,7 +229,7 @@ class BustersAgent(object):
 #                         PRÁCTICA 2                           #
 ################################################################
 
-class QLearningAgent(BustersAgent):
+class BasicAgentAA(BustersAgent):
     """
         These default parameters can be changed from the pacman.py command line.
         For example, to change the exploration rate, try:
@@ -319,14 +319,13 @@ class QLearningAgent(BustersAgent):
     def rewardFunction(self):
         reward = 0
         atr1 = self.lastQState[0]
+        latr2 = self.lastQState[1]
         if atr1[0] != '' and atr1[0] != self.lastAction and self.lastAction != 'North' and self.lastAction != 'South':
             reward -= 1
         elif atr1[1] != '' and atr1[1] != self.lastAction and self.lastAction != 'West' and self.lastAction != 'East':
             reward -= 1
         else:
             reward += 5
-
-        latr2 = self.lastQState[1]
         atr2 = self.currentQState[1]
 
         if latr2:
@@ -339,7 +338,7 @@ class QLearningAgent(BustersAgent):
         return reward
 
     # alpha = 0.2 epsilon = 0.05
-    def __init__(self, alpha=0, epsilon=0, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
+    def __init__(self, alpha=0.0, epsilon=0.0, gamma=0.8, numTraining = 10,  index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
 
         BustersAgent.__init__(self,index,inference, ghostAgents, observeEnable, elapseTimeEnable)
         self.episodesSoFar = 0
